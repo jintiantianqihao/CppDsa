@@ -1,44 +1,76 @@
 #include <iostream>
+#include <string>
+#include <cstring>
+
 using namespace std;
 
-typedef unsigned Positive;//非负数化实义命名
+typedef unsigned Length;
 
-//fib 函数实现
-/*1.二分递归法 ： O(2^n) */
-Positive fib1(Positive n)
+void mySwap(Length &x, Length &y)
 {
-  return (n < 2) ? n : fib1(n - 1) + fib1(n - 2);
+  Length temp = x;
+  x = y;
+  y = x;
+
+  return;
 }
 
-/*2.线性迭代法：O(n)----"上台阶"*/
-Positive fib2(Positive n)
+void mySwap(Length *x, Length *y)
 {
-  Positive f = 1, g = 0;
-  if(n == 0) return g;
-  --n;
-  while ( n-- > 0)
-  {
-    f = f + g;
-    g = f - g;
-  }
+  Length temp = *x;
+  *x = *y;
+  *y = temp;
 
+  return;
+}
+
+void mySwap(const char **A, const char **B)
+{
+   const char *temp = *A;
+   *A = *B;
+   *B = temp;  
+
+  return;
+}
+
+int myMax(int a, int b)
+{
+  return ( a > b) ? a : b;
+}
+
+//只读类型
+Length myLCS (const char *A, Length n, const char *B, Length m)
+{
+  if(n < m) { mySwap(&A ,&B); mySwap(m ,n); }
+
+  Length *lcs1 = new Length[m + 1];
+  Length *lcs2 = new Length[m + 1];
+  memset(lcs1, 0x00 ,sizeof(Length) * (m + 1));
+  memset(lcs1, 0x00 ,sizeof(Length) * (m + 1));
   
-  return f;
+  for (size_t i = 0; i < n; mySwap(lcs1,lcs2), i++)
+  {
+    for (size_t j = 0; j < m; ++j)
+    {
+      lcs2[j + 1] =  (A[i] == B[j]) ? 1+lcs1[j] : max(lcs2[j], lcs1[j + 1]);
+    }
+  }
   
+  Length solu = lcs1[m];
+  delete[] lcs1;
+  delete[] lcs2;
+
+  return solu;
 }
 
 int main(void)
 {
-  int n = 0;
-  cout << "请输入计算值：" << endl;
-  cin >> n;
+  string str1 ("tsinghua");
+  string str2 ("computer");
+  const char *A = str1.c_str();
+  const char *B = str2.c_str();
 
-  for (size_t i = 0; i < n; ++i)
-  {
-    cout << "fib(" << i << ") = " << fib1(i) <<endl;
-    //cout << "fib(" << i << ") = " << fib2(i) <<endl;
-  }
-  
-  
+  cout << myLCS(A, str1.size(), B, str2.size()) <<endl;
+
   return 0;
-} 
+}
