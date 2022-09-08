@@ -14,7 +14,8 @@ Positive fib1(Positive n)
 Positive fib2(Positive n)
 {
   Positive f = 1, g = 0;
-  if(n == 0) return g;
+  if(n == 0) 
+    return g;
   --n;
   while ( n-- > 0)
   {
@@ -33,8 +34,7 @@ int main(void)
   cout << "请输入计算值：" << endl;
   cin >> n;
 
-  for (size_t i = 0; i < n; ++i)
-  {
+  for (size_t i = 0; i < n; ++i) {
     cout << "fib(" << i << ") = " << fib1(i) <<endl;
     //cout << "fib(" << i << ") = " << fib2(i) <<endl;
   }

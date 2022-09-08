@@ -18,9 +18,10 @@ int mySum(int A[], Positive low, Positive high)
 
 int mySum(int A[], Positive low, Positive high)//二分法遍历每一个值
 {
-  if(low == high) return A[low];
+  if(low == high) 
+    return A[low];
 
-  int mid = (low + high) >> 1;
+  int mid =(low + (low - high)) >> 1;
   return mySum(A, 0, mid) + mySum(A, mid+1, high); 
 }
 
@@ -29,8 +30,8 @@ int main(void)
   int A[] = {1,2,3,4,5};
   int B[] = {1,2,3,4};
 
-  cout<<mySum(A, 0, sizeof(A)/sizeof(int)-1)<<endl;
-  cout<<mySum(B, 0, sizeof(B)/sizeof(int)-1)<<endl;
+  cout << mySum(A, 0, sizeof(A)/sizeof(int)-1) << endl;
+  cout << mySum(B, 0, sizeof(B)/sizeof(int)-1) << endl;
 
   return 0;
 }

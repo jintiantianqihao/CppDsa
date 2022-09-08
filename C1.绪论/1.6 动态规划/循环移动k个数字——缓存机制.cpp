@@ -3,8 +3,7 @@ using namespace std;
 
 void myPrint(int *A, int n)
 {
-  for (size_t i = 0; i < n; ++i)
-  {
+  for (size_t i = 0; i < n; ++i) {
     cout << *(A + i) << " ";
   }
   cout << endl;
@@ -17,8 +16,7 @@ int shift(int *A, int n, int s, int k)//s是抽出的同余头
 {
   int temp = A[s];//利用O(1)空间抽出同余节点
   int i = s, mov = 0;
-  for (size_t j = (s + k) % n; s != j; ++mov)
-  {
+  for (size_t j = (s + k) % n; s != j; ++mov) {
     A[i] = A[j];
     i = j;
     j = (j + k) % n;
@@ -31,8 +29,7 @@ int shift(int *A, int n, int s, int k)//s是抽出的同余头
 //翻转函数
 void myReverse(int *A, int k)
 {
-  for (int low = 0, high = k-1; low < high; ++low, --high)
-  {
+  for (int low = 0, high = k-1; low < high; ++low, --high) {
     int temp = A[low];
     A[low] = A[high];
     A[high] = temp;
@@ -61,8 +58,7 @@ void shift0(int *A, int n, int k)
  */
 void shift1(int *A, int n, int k)
 {
-  for (int mov = 0, s = 0; mov < n; ++s)
-  {
+  for (int mov = 0, s = 0; mov < n; ++s) {
     mov += shift(A, n, s, k);
   }
 }
