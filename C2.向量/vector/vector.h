@@ -11,7 +11,11 @@ Rank myMax(Rank a, Rank b) {
 template <typename T> class Vector { //向量模板类
 
 protected:
-    Rank _size; Rank _capacity;  T* _elem; //规模(逻辑存储空间)、容量(物理存储空间)、数据区
+    /*三个成员对象*/
+    Rank _size; //规模(逻辑存储空间)
+    Rank _capacity; //容量(物理存储空间)
+    T* _elem; //数据区
+
     void copyFrom(T const* A, Rank low, Rank high); //复制数组区间A[low, high)
     void expand(); //空间不足时扩容
     void shrink(); //装填因子过小时压缩
@@ -48,6 +52,7 @@ public:
     Rank search(T const& e) const { return (0 >= _size) ? -1 : search(e, 0, _size); }//有序向量整体查找
     Rank search(T const& e, Rank low, Rank high) const; //有序向量区间查找
 
+
  // 可写访问接口
     T& operator[] (Rank r); //重载下标操作符，可以类似于数组形式引用各元素
     const T& operator[] (Rank r) const; //仅限于做右值的重载版本
@@ -65,7 +70,12 @@ public:
 
  // 遍历
     void traverse(void (*) (T&)); //遍历（使用函数指针，只读或局部性修改）
-    template <typename VST> void traverse(VST&); //遍历（使用函数对象，可全局性修改）
+    template <typename VST> void traverse(VST); //遍历（使用函数对象，可全局性修改）****此处为何不能用引用呢？****
+    
+    struct myPrint { virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
+    void print( Vector<T> &v) { v.traverse( myPrint() )};//向量遍历打印
+    
+
 }; //Vector
 
 
