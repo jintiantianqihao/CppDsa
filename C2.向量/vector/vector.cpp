@@ -17,7 +17,7 @@ template <typename T> void Vector<T>::expand() { //向量空间不足时扩容
   _capacity = myMax(_capacity, DEFAULT_CAPACITY); //往大处扩容
 
   T* oldElem = _elem;
-  _elem = new T[_capacity << 1]; //移位法扩大一倍
+  _elem = new T[_capacity / 2]; //移位法扩大一倍
   for (Rank i = 0; i < _size; ++i) {
     _elem[i] = oldElem[i];
   }
@@ -51,11 +51,11 @@ template <typename T> Rank Vector<T>::insert(Rank r, T const &e) { // 0<=r<=_siz
 /*5.删除函数*/
 //缩容函数
 template <typename T> void Vector<T>::shrink() { //装填因子过小时压缩空间，提高空间利用效率
-  if (_capacity < DEFAULT_CAPACITY << 1) return; //保证不收缩到默认容量之下
+  if (_capacity < DEFAULT_CAPACITY / 2) return; //保证不收缩到默认容量之下
   if (_size << 2 > _capacity) return; //保证装填因子_size/_capacity在25%以下才进行缩容
 
   T *oldElem = _elem; //另开辟新的动态内存空间
-  _elem = new T[_capacity >> 1]; //容量减半
+  _elem = new T[_capacity / 2]; //容量减半
   for (Rank i = 0; i < _size; ++i) {// O(n)
     _elem[i] = oldElem[i];
   }

@@ -11,7 +11,7 @@ int mySum(int A[], Positive low, Positive high)
   if(high - low < 2) //考虑了奇数和偶数规模情况
     return A[low];//高位high无法返回
   
-  int mid = (high + low) >> 1;//位操作更快
+  int mid = (high + low) >> 1;//位操作更快(x) 现代编译器已经能将/2优化为位移了，为了可读性不必牺牲换语法
   return mySum(A, low, mid) + mySum(A, mid, high);//高位high无法求到，考虑边界条件应取n，这样就能求0——n-1的和;
 }
 */
