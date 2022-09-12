@@ -16,12 +16,12 @@ int mySum(int A[], Positive low, Positive high)
 }
 */
 
-int mySum(int A[], Positive low, Positive high)//二分法遍历每一个值
+int mySum(int A[], Positive low, Positive high) //二分法遍历每一个值
 {
   if(low == high) 
     return A[low];
 
-  int mid =(low + (low - high)) >> 1;
+  int mid =(low + (low - high)) / 2;
   return mySum(A, 0, mid) + mySum(A, mid+1, high); 
 }
 

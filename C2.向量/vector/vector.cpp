@@ -1,5 +1,6 @@
 #include <iostream>
 #include "vector.h"
+using std::cin,std::cout,std::endl;
 
 /*1.复制函数*/
 template <typename T> void Vector<T>::copyFrom( T const* A, Rank low, Rank high) { //T为基本类型或者重载后的操作符
@@ -83,6 +84,7 @@ template <typename T> T Vector<T>::remove(Rank r) { //O(n-r)
   return e; //返回被删除的元素
 }//若反之利用递归调用单元素删除实现区间删除，则会遭遇与循环移位相同的窘境：大量单次无效的前移，不能一步到位，从而导致时间复杂度为O(n^2)而非O(n)
 
+/***********************无序向量********************/
 /*6.查找函数*/
 template <typename T> Rank Vector<T>::find(T const &e, Rank low, Rank high) const { //O(high - low), 0<=low<=high<=_size
   while ((low < high--) && (e != _elem[high]));//while ((e != _elem[--high]) && (low <= high)); (错误，可能在最后越下界访问到_elem[-1],发生段错误)
@@ -116,16 +118,74 @@ template <typename T> template <typename VST> void Vector<T>::traverse(VST visit
   return;
 }
 
-/* 测试函数
+//打印函数实例
 template <typename T> struct myPrint { virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
+template <typename T> void print(Vector<T> &v) { v.traverse( myPrint<T>() ); cout << endl;};//向量遍历打印
+
+/* 测试函数
+template <typename T> class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
 template <typename T> void print(Vector<T> &v) { v.traverse( myPrint<T>() ); std::cout << std::endl;};//向量遍历打印
-template <typename T> struct myIncrease { virtual void operator()(T &e) { ++e;}};//函数对象，单个加一：通过重载操作符()实现
+template <typename T> class myIncrease { public: virtual void operator()(T &e) { ++e;}};//函数对象，单个加一：通过重载操作符()实现
 template <typename T> void increase(Vector<T> &v) { v.traverse( myIncrease<T>() );};//向量遍历加一
-template <typename T> struct myDecrease { virtual void operator()(T &e) { --e;}};//函数对象，单个减一：通过重载操作符()实现
+template <typename T> class myDecrease { public: virtual void operator()(T &e) { --e;}};//函数对象，单个减一：通过重载操作符()实现
 template <typename T> void decrease(Vector<T> &v) { v.traverse( myDecrease<T>() );};//向量遍历减一
-template <typename T> struct myDoubble { virtual void operator()(T &e) { e *= 2;}};//函数对象，单个加倍：通过重载操作符()实现
+template <typename T> class myDoubble { public: virtual void operator()(T &e) { e *= 2;}};//函数对象，单个加倍：通过重载操作符()实现
 template <typename T> void doubble(Vector<T> &v) { v.traverse( myDoubble<T>() );};//向量遍历加倍
-template <typename T> struct mySum { virtual void operator()(T &e) { sumValue += e;}};//通过全局变量记录求和值
-template <typename T> void sum(Vector<T> &v) { v.traverse( mySum<T>() );};//向量整体求和
+template <typename T> class mySum { public: int& Sum; mySum(int& sum) : Sum(sum){} virtual void operator()(T &e) { Sum += e;}};//通过全局变量记录求和值(可以保存状态)
+template <typename T> Rank sum(Vector<T> &v) { int sumValue = 0; v.traverse( mySum<T>(sumValue)); return sumValue; };//向量整体求和
+
+int main(void)
+{
+
+   int A[] = {1,2,3,4,5};
+   Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
+   print(v2);
+   v2.insert(0, 0);
+   print(v2);
+   increase(v2);
+   print(v2);
+   decrease(v2);
+   print(v2);
+   doubble(v2);
+   print(v2);
+  
+   cout << sum(v2) <<endl;
+}
 */
+
+/**********************有序向量************************/
+/*9.有序性检查*/
+//1.函数对象实现
+template <typename T> class CheckOrder { //函数对象：判断一个T类对象是否局部有序
+ public:
+  T pre; 
+  Rank &u; //此处声明了类型成员，定义需要在构造函数生成的过程中进行，并且这里必须有自定义构造函数，而不能依赖生成构造函数
+  
+  CheckOrder(Rank& unsorted, T& first) : pre(first),u(unsorted) {} //类构造函数，初始化引用型对象u;
+  virtual void operator()(T& e) { if (pre > e) ++u; pre = e;} //重载函数：找寻逆序对
+};
+
+template <typename T> void checkOrder(Vector<T> &v) {
+  Rank unsorted = 0; //逆序数计数器
+  v.traverse( CheckOrder(unsorted,v[0]) ); //统计紧邻逆序对
+  if(unsorted > 0)
+    cout << "Unsorted with " << unsorted << " adjacent inversion(s)" << endl;
+  else
+    cout << "Sorted" << endl;
+
+  return;
+}
+
+//2.成员函数实现
+template <typename T> Rank Vector<T>::disordered() const {
+  int unsorted = 0;
+  for (int i = 1; i < _size; ++i) {
+    (_elem[ i-1 ] > _elem[i]) ? ++unsorted : ; //简写为 unsorted += (_elem[ i-1 ] > _elem [i]);
+  }
+  
+  return unsorted;//返回逆序对数
+}
+
+
+
 

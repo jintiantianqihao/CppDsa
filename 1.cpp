@@ -2,7 +2,6 @@
 #include <vector>
 using namespace std;
 
-int sumValue = 0;
 using Rank = int; //秩
 #define DEFAULT_CAPACITY  3 //默认的初始容量（实际应用中可设置为更大）
 
@@ -48,6 +47,7 @@ public:
     Rank search ( T const& e ) const //有序向量整体查找
    { return ( 0 >= _size ) ? -1 : search ( e, 0, _size ); }
     Rank search ( T const& e, Rank lo, Rank hi ) const; //有序向量区间查找
+    Rank disordered() const;
 
  // 可写访问接口
     T& operator[] ( Rank r ); //重载下标操作符，可以类似于数组形式引用各元素
@@ -66,7 +66,7 @@ public:
 
  // 遍历
     void traverse ( void (* ) ( T& ) ); //遍历（使用函数指针，只读或局部性修改）
-    template <typename VST> void traverse (VST); //遍历（使用函数对象，可全局性修改
+    template <typename VST> void traverse (VST); //遍历（使用函数对象，可全局性修改）
 
  }; //Vector
 
@@ -175,32 +175,70 @@ template <typename T> void Vector<T>::traverse(void (*visit) (T&)) { /*返回值
 } //函数指针，只读类型或者做局部修改
 
 //函数对象模版实现法
-template <typename T> template <typename VST> void Vector<T>::traverse(VST visit) { //函数对象，便于全局修改
+template <typename T> template <typename VST> void Vector<T>::traverse(VST visit) { //函数对象，便于全局修改（此处传引用和传值均可，因为只涉及调用函数，不涉及修改函数对象）
   for (Rank i = 0; i < _size; ++i) {
     visit( _elem[i] );
   }
   return;
 }
 
-template <typename T> struct myPrint { virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
+template <typename T> class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
 template <typename T> void print(Vector<T> &v) { v.traverse( myPrint<T>() ); std::cout << std::endl;};//向量遍历打印
-template <typename T> struct myIncrease { virtual void operator()(T &e) { ++e;}};//函数对象，单个加一：通过重载操作符()实现
+template <typename T> class myIncrease { public: virtual void operator()(T &e) { ++e;}};//函数对象，单个加一：通过重载操作符()实现
 template <typename T> void increase(Vector<T> &v) { v.traverse( myIncrease<T>() );};//向量遍历加一
-template <typename T> struct myDecrease { virtual void operator()(T &e) { --e;}};//函数对象，单个减一：通过重载操作符()实现
+template <typename T> class myDecrease { public: virtual void operator()(T &e) { --e;}};//函数对象，单个减一：通过重载操作符()实现
 template <typename T> void decrease(Vector<T> &v) { v.traverse( myDecrease<T>() );};//向量遍历减一
-template <typename T> struct myDoubble { virtual void operator()(T &e) { e *= 2;}};//函数对象，单个加倍：通过重载操作符()实现
+template <typename T> class myDoubble { public: virtual void operator()(T &e) { e *= 2;}};//函数对象，单个加倍：通过重载操作符()实现
 template <typename T> void doubble(Vector<T> &v) { v.traverse( myDoubble<T>() );};//向量遍历加倍
+template <typename T> class mySum { public: int& Sum; mySum(int& sum) : Sum(sum){} virtual void operator()(T &e) { Sum += e;}};//通过全局变量记录求和值(可以保存状态)
+template <typename T> Rank sum(Vector<T> &v) { int sumValue = 0; v.traverse( mySum<T>(sumValue)); return sumValue; };//向量整体求和
 
-template <typename T> struct mySum { virtual void operator()(T &e) { sumValue += e;}};//通过全局变量记录求和值
-template <typename T> void sum(Vector<T> &v) { v.traverse( mySum<T>() );};//向量整体求和
+
+template <typename T> class CheckOrder { //函数对象：判断一个T类对象是否局部有序
+ public:
+  T pre;
+  Rank& u; //此处声明了类型成员，定义需要在构造函数生成的过程中进行，并且这里必须有自定义构造函数，而不能依赖生成构造函数
+
+  CheckOrder(Rank& unsorted, T& first) : pre(first),u(unsorted) {} //类构造函数，初始化引用型对象u;
+  virtual void operator()(T& e) { if (pre > e) ++u; pre = e;} //重载函数：找寻逆序对
+};
+
+template <typename T> void checkOrder(Vector<T> &v) { //执行函数
+  Rank unsorted = 0; //逆序数计数器
+  v.traverse( CheckOrder(unsorted,v[0]) ); //统计紧邻逆序对
+  if(unsorted > 0)
+    cout << "Unsorted with " << unsorted << " adjacent inversion(s)" << endl;
+  else
+    cout << "Sorted" << endl;
+
+  return;
+}
+
+//2.成员函数实现
+template <typename T> Rank Vector<T>::disordered() const {
+  int unsorted = 0;
+  for (int i = 1; i < _size; ++i) {
+    (_elem[ i-1 ] <= _elem[i]) ? : ++unsorted; //简写为 unsorted += (_elem[ i-1 ] > _elem [i]);
+  }
+  if(unsorted > 0)
+    cout << "Unsorted with " << unsorted << " adjacent inversion(s)" << endl;
+  else
+    cout << "Sorted" << endl;
+
+  return unsorted;//返回逆序对数
+}
 
 int main(void)
 {
 
    int A[] = {1,2,3,4,5};
    Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
+   checkOrder(v2);
+   v2.disordered();
    print(v2);
-   v2.insert(0, 0);
+   v2.insert(2, 0);
+   checkOrder(v2);
+   v2.disordered();
    print(v2);
    increase(v2);
    print(v2);
@@ -208,6 +246,6 @@ int main(void)
    print(v2);
    doubble(v2);
    print(v2);
-   sum(v2);
-   cout << sumValue <<endl;
+  
+   cout << sum(v2) <<endl;
 }
