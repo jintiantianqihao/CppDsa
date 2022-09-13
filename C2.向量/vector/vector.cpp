@@ -3,7 +3,8 @@
 using std::cin,std::cout,std::endl;
 
 /*1.复制函数*/
-template <typename T> void Vector<T>::copyFrom( T const* A, Rank low, Rank high) { //T为基本类型或者重载后的操作符
+template <typename T> 
+void Vector<T>::copyFrom( T const* A, Rank low, Rank high) { //T为基本类型或者重载后的操作符
   _elem = new T[_capacity = 2*(high - low)];//分配空间，并为_capacity赋值
   _size = 0;//大小初始化，规模清零
   while (low < high)
@@ -13,7 +14,8 @@ template <typename T> void Vector<T>::copyFrom( T const* A, Rank low, Rank high)
 }
 
 /*2.扩容函数*/
-template <typename T> void Vector<T>::expand() { //向量空间不足时扩容
+template <typename T> 
+void Vector<T>::expand() { //向量空间不足时扩容
   if (_size < _capacity) return; //尚未满员时，不必扩容
   _capacity = myMax(_capacity, DEFAULT_CAPACITY); //往大处扩容
 
@@ -28,16 +30,19 @@ template <typename T> void Vector<T>::expand() { //向量空间不足时扩容
 } //得益于向量封装，尽管扩容后数据区的物理地址有所改变，*但不会出现"野指针"
 
 /*3.下标运算符重载：为了兼容原有运算符————循秩访问*/
-template <typename T> T& Vector<T>::operator[] (Rank r) { //重载下标运算符
+template <typename T>
+T& Vector<T>::operator[] (Rank r) { //重载下标运算符
   return _elem[r]; //0 <= r <= _size
 }
 
-template <typename T> const T& Vector<T>::operator[](Rank r) const { //只读仅仅做右值的重载下标符
+template <typename T> 
+const T& Vector<T>::operator[](Rank r) const { //只读仅仅做右值的重载下标符
   return _elem[r]; //0 <= r <= _size
 }
 
 /*4.插入函数*/
-template <typename T> Rank Vector<T>::insert(Rank r, T const &e) { // 0<=r<=_size
+template <typename T> 
+Rank Vector<T>::insert(Rank r, T const &e) { // 0<=r<=_size
   expand(); //如有必要则扩容
 
   for (Rank i = _size; i > r; --i) { //O(n - r)：从后往前
@@ -51,7 +56,8 @@ template <typename T> Rank Vector<T>::insert(Rank r, T const &e) { // 0<=r<=_siz
 
 /*5.删除函数*/
 //缩容函数
-template <typename T> void Vector<T>::shrink() { //装填因子过小时压缩空间，提高空间利用效率
+template <typename T> 
+void Vector<T>::shrink() { //装填因子过小时压缩空间，提高空间利用效率
   if (_capacity < DEFAULT_CAPACITY / 2) return; //保证不收缩到默认容量之下
   if (_size << 2 > _capacity) return; //保证装填因子_size/_capacity在25%以下才进行缩容
 
@@ -66,7 +72,8 @@ template <typename T> void Vector<T>::shrink() { //装填因子过小时压缩�
 }
 
 //区间删除
-template <typename T> int Vector<T>::remove(Rank low, Rank high) { //O(n -high)
+template <typename T>
+int Vector<T>::remove(Rank low, Rank high) { //O(n -high)
   if (low == high) return 0; //为了提升算法效率，单独处理特殊简易的退化情况
   while (high < _size) {
     _elem[low++] = _elem[high++]; //O(high - low) : [high,_size)顺次前移，low更新到low + _size - high = n - (high - low)
@@ -78,7 +85,8 @@ template <typename T> int Vector<T>::remove(Rank low, Rank high) { //O(n -high)
 }
 
 //单元素删除：直接调用区间删除的特例版即可
-template <typename T> T Vector<T>::remove(Rank r) { //O(n-r)
+template <typename T> 
+T Vector<T>::remove(Rank r) { //O(n-r)
   T e = _elem[r]; //备份，用作返回值
   remove(r, r + 1);
   return e; //返回被删除的元素
@@ -86,13 +94,15 @@ template <typename T> T Vector<T>::remove(Rank r) { //O(n-r)
 
 /***********************无序向量********************/
 /*6.查找函数*/
-template <typename T> Rank Vector<T>::find(T const &e, Rank low, Rank high) const { //O(high - low), 0<=low<=high<=_size
+template <typename T> 
+Rank Vector<T>::find(T const &e, Rank low, Rank high) const { //O(high - low), 0<=low<=high<=_size
   while ((low < high--) && (e != _elem[high]));//while ((e != _elem[--high]) && (low <= high)); (错误，可能在最后越下界访问到_elem[-1],发生段错误)
   return high; //返回值小于low时则查找失败；否则命中目标的秩，多值情况返回秩最大者  
 }
 
 /*7.无序去重函数*/
-template <typename T> Rank Vector<T>::deduplicate() {
+template <typename T> 
+Rank Vector<T>::deduplicate() {
   Rank oldSize = _size;
   for (Rank i = 1; i < _size; ) {
     (find(_elem[i], 0, i) < 0) ? ++i : remove(i); //前缀钟寻找雷同者；没找到，继续找下一个；找到，删除该重复元素，并更新规模
@@ -103,7 +113,8 @@ template <typename T> Rank Vector<T>::deduplicate() {
 
 /*8.遍历函数————利用函数对象实现*/
 //函数指针实现法
-template <typename T> void Vector<T>::traverse(void (*visit) (T&)) { /*返回值+函数名+参数列表类型*/
+template <typename T> 
+void Vector<T>::traverse(void (*visit) (T&)) { /*返回值+函数名+参数列表类型*/
   for(Rank i = 0; i < _size; ++i) {
     visit(_elem[i]);
   }
@@ -111,7 +122,8 @@ template <typename T> void Vector<T>::traverse(void (*visit) (T&)) { /*返回值
 } //函数指针，只读类型或者做局部修改
 
 //函数对象模版实现法
-template <typename T> template <typename VST> void Vector<T>::traverse(VST visit) { //函数对象，便于全局修改
+template <typename T> template <typename VST> 
+void Vector<T>::traverse(VST visit) { //函数对象，便于全局修改
   for (Rank i = 0; i < _size; ++i) {
     visit( _elem[i] );
   }
@@ -119,8 +131,11 @@ template <typename T> template <typename VST> void Vector<T>::traverse(VST visit
 }
 
 //打印函数实例
-template <typename T> struct myPrint { virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
-template <typename T> void print(Vector<T> &v) { v.traverse( myPrint<T>() ); cout << endl;};//向量遍历打印
+template <typename T>
+void print(Vector<T> &v) { 
+  v.traverse( myPrint<T>() ); 
+  cout << endl;
+};//向量遍历打印
 
 /* 测试函数
 template <typename T> class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};//函数对象，单个打印：通过重载操作符()实现
@@ -155,17 +170,10 @@ int main(void)
 
 /**********************有序向量************************/
 /*9.有序性检查*/
-//1.函数对象实现
-template <typename T> class CheckOrder { //函数对象：判断一个T类对象是否局部有序
- public:
-  T pre; 
-  Rank &u; //此处声明了类型成员，定义需要在构造函数生成的过程中进行，并且这里必须有自定义构造函数，而不能依赖生成构造函数
-  
-  CheckOrder(Rank& unsorted, T& first) : pre(first),u(unsorted) {} //类构造函数，初始化引用型对象u;
-  virtual void operator()(T& e) { if (pre > e) ++u; pre = e;} //重载函数：找寻逆序对
-};
 
-template <typename T> void checkOrder(Vector<T> &v) {
+//1.函数对象实现
+template <typename T> 
+void checkOrder(Vector<T> &v) {
   Rank unsorted = 0; //逆序数计数器
   v.traverse( CheckOrder(unsorted,v[0]) ); //统计紧邻逆序对
   if(unsorted > 0)
@@ -177,15 +185,54 @@ template <typename T> void checkOrder(Vector<T> &v) {
 }
 
 //2.成员函数实现
-template <typename T> Rank Vector<T>::disordered() const {
+template <typename T> 
+Rank Vector<T>::disordered() const {
   int unsorted = 0;
   for (int i = 1; i < _size; ++i) {
-    (_elem[ i-1 ] > _elem[i]) ? ++unsorted : ; //简写为 unsorted += (_elem[ i-1 ] > _elem [i]);
+    if (_elem[ i-1 ] > _elem[i]) //简写为 unsorted += (_elem[ i-1 ] > _elem [i]);
+      ++unsorted; 
   }
   
   return unsorted;//返回逆序对数
 }
 
+/*10.有序向量去重函数*/
 
+
+//高效版
+template <typename T> 
+int Vector<T>::uniquify() { //O(n)
+  int oldSize = _size;
+  int i = 0;
+  for (int j = 1; j < _size; ++j) {
+    if (_elem[i] != _elem[j])
+      _elem[++i] = _elem[j];
+  }
+  _size = i + 1;
+  shrink(); //解除低装填因子时重复元素的内存占用
+
+  return oldSize -_size; //返回删除元素隔个数
+}
+//低效版
+/*
+template <typename T> 
+int Vector<T>::uniquify() { //O(n^2)
+  int oldSize = _size;
+  for (Rank i = 1; i < _size; ) {
+    (_elem[i-1] == _elem[i]) ? remove(i) : ++i;
+  }
+  
+  return oldSize - _size; //返回重复的元素个数
+}
+*/
+
+/*11.有序向量查找函数*/
+//统一接口
+template <typename T> 
+Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
+  return (rand() % 2) ?  //按各50%概率调用
+    binSearch(_elem, e, low, high)  //二分查找算法，或
+  : fibSearch(_elem, e, low, high); //Fibonacci查找算法
+}
 
 

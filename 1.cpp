@@ -227,16 +227,35 @@ template <typename T> Rank Vector<T>::disordered() const {
 
   return unsorted;//返回逆序对数
 }
+/*
+template <typename T> int Vector<T>::uniquify() { //O(n^2)
+  int oldSize = _size;
+  for (Rank i = 1; i < _size; ) {
+    (_elem[i-1] == _elem[i]) ? remove(i) : ++i;
+  }
+  
+  return oldSize - _size; //返回重复的元素个数
+}
+*/
+
+template <typename T> int Vector<T>::uniquify() { //O(n)
+  int oldSize = _size;
+  int i = 0;
+  for (int j = 1; j < _size; ++j) {
+    if (_elem[i] != _elem[j])
+      _elem[++i] = _elem[j];
+  }
+  _size = i + 1;
+  shrink(); //解除低装填因子时重复元素的内存占用
+
+  return oldSize -_size; //返回删除元素隔个数
+}
 
 int main(void)
 {
 
-   int A[] = {1,2,3,4,5};
+   int A[] = {3,3,3,3,5};
    Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
-   checkOrder(v2);
-   v2.disordered();
-   print(v2);
-   v2.insert(2, 0);
    checkOrder(v2);
    v2.disordered();
    print(v2);
@@ -246,6 +265,8 @@ int main(void)
    print(v2);
    doubble(v2);
    print(v2);
-  
+   v2.uniquify();
+   print(v2);
+
    cout << sum(v2) <<endl;
 }

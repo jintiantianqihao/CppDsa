@@ -4,13 +4,10 @@
 using Rank = int; //秩
 #define DEFAULT_CAPACITY  3 //默认的初始容量（实际应用中可设置为更大）
 
-Rank myMax(Rank a, Rank b) {
-   return (a > b) ? a : b;
-}
+template <typename T> 
+class Vector { //向量模板类
 
-template <typename T> class Vector { //向量模板类
-
-protected:
+ protected:
     /*三个成员对象*/
     Rank _size; //规模(逻辑存储空间)
     Rank _capacity; //容量(物理存储空间)
@@ -30,7 +27,7 @@ protected:
     void quickSort(Rank low, Rank high); //快速排序算法
     void shellSort(Rank low, Rank high); //希尔排序算法
 
-public:
+ public:
     // 构造函数
     Vector(int c = DEFAULT_CAPACITY, Rank s = 0, T v = 0) //容量为c、规模为s、所有元素初始为v
     {
@@ -72,6 +69,27 @@ public:
     void traverse(void (*) (T&)); //遍历（使用函数指针，只读或局部性修改）
     template <typename VST> void traverse(VST); //遍历（使用函数对象，可全局性修改）临时变量是常量引用，无法使用引用初始化
 }; //Vector
+
+//辅助类
+template <typename T> 
+class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};//类外类函数对象，单个打印：通过重载操作符()实现
+
+template <typename T> 
+class CheckOrder { //函数对象：判断一个T类对象是否局部有序
+public:
+  T pre; 
+  Rank &u; //此处声明了类型成员，定义需要在构造函数生成的过程中进行，并且这里必须有自定义构造函数，而不能依赖生成构造函数
+  
+  CheckOrder(Rank& unsorted, T& first) : pre(first),u(unsorted) {} //类构造函数，初始化引用型对象u;
+  virtual void operator()(T& e) { if (pre > e) ++u; pre = e;} //重载函数：找寻逆序对
+};
+
+//类外辅助函数
+inline Rank myMax(Rank a, Rank b) { return (a > b) ? a : b; } //内联一个比较函数
+template <typename T> void print(Vector<T> &v);//向量遍历打印
+template <typename T> void checkOrder(Vector<T> &v);//向量有序性判定
+
+/***********************************************************实现部分(模板类不支持分离式编译)*************************************************************/
 
 
 #endif
