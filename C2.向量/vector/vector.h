@@ -76,7 +76,7 @@ class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};
 
 template <typename T> 
 class CheckOrder { //函数对象：判断一个T类对象是否局部有序
-public:
+ public:
   T pre; 
   Rank &u; //此处声明了类型成员，定义需要在构造函数生成的过程中进行，并且这里必须有自定义构造函数，而不能依赖生成构造函数
   
@@ -84,10 +84,28 @@ public:
   virtual void operator()(T& e) { if (pre > e) ++u; pre = e;} //重载函数：找寻逆序对
 };
 
+class Fib { //Fib计算类
+ private:
+  Rank f, g;
+
+ public:
+  Fib(Rank n) { //初始化为不小于n的Fibonacci项
+    f = 1, g = 0; //fib(0),fib(-1)
+    while (g < n) { //O(log_phi(n))
+      next();
+    }
+  }
+  Rank get() { return g; } //获得当前项Fibonacci项 O(1)
+  Rank next() { f = f + g; g = f - g; return g;} //转向下一项Fibonacci项 O(1)
+  Rank prev() { g = f - g; f = f - g; return g;} //转向前一项Fibonacci项 O(1)
+};
+
 //类外辅助函数
 inline Rank myMax(Rank a, Rank b) { return (a > b) ? a : b; } //内联一个比较函数
 template <typename T> void print(Vector<T> &v);//向量遍历打印
 template <typename T> void checkOrder(Vector<T> &v);//向量有序性判定
+
+template <typename T> static Rank binSearch(T* S, T const& e, Rank low, Rank high); //二分查找A
 
 /***********************************************************实现部分(模板类不支持分离式编译)*************************************************************/
 

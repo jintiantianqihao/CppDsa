@@ -69,6 +69,11 @@ public:
     template <typename VST> void traverse (VST); //遍历（使用函数对象，可全局性修改）
 
  }; //Vector
+template <typename T> 
+static Rank binSearch(T* S, T const& e, Rank low, Rank high);
+template <typename T>
+static Rank fibSearch(T* S, T const& e, Rank low, Rank high);
+
 
 template <typename T> void Vector<T>::copyFrom( T const* A, Rank low, Rank high)
 {
@@ -251,22 +256,67 @@ template <typename T> int Vector<T>::uniquify() { //O(n)
   return oldSize -_size; //返回删除元素隔个数
 }
 
+/*11.有序向量查找函数*/
+//统一接口
+template <typename T> 
+Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
+  return (rand() % 2) ?  //按各50%概率调用
+    binSearch(_elem, e, low, high)  //二分查找算法，或
+  : fibSearch(_elem, e, low, high); //Fibonacci查找算法
+}
+
+//二分查找A实现
+template <typename T> 
+static Rank binSearch(T* S, T const& e, Rank low, Rank high) {
+  while (low < high) {
+    Rank mid = low + (high - low) / 2;
+    
+    if (e < S[mid]) high = mid; //high是尾后,访问不到[low,high),等效于mid-1
+    else if (S[mid] < e) low = mid + 1;
+    else return mid; //查找成功，返回下标
+  }
+  
+  return -1; //查找失败，返回一个不存在的值
+}
+
+//Fibonacci查找实现
+class Fib { //Fib计算类
+ private:
+  Rank f, g;
+
+ public:
+  Fib(Rank n) { //初始化为不小于n的Fibonacci项
+    f = 1, g = 0; //fib(0),fib(-1)
+    while (g < n) { //O(log_phi(n))
+      next();
+    }
+  }
+  Rank get() { return g; } //获得当前项Fibonacci项 O(1)
+  Rank next() { f = f + g; g = f - g; return g;} //转向下一项Fibonacci项 O(1)
+  Rank prev() { g = f - g; f = f - g; return g;} //转向前一项Fibonacci项 O(1)
+};
+
+template <typename T>
+static Rank fibSearch(T* S, T const& e, Rank low, Rank high) {
+  cout << "fib:" <<endl;
+  for( Fib fib(high - low);low < high;) { //Fibonacci数列制表（先产生一个足够大的Fib）
+    while ( high - low < fib.get() ) fib.prev(); //从后往前找到合适的Fib分割点轴点——————分摊O(1)
+    Rank mid = low + fib.get() - 1;
+
+    if(e < S[mid]) high = mid - 1; //左闭右开区间
+    else if (S[mid] < e) low = mid;
+    else return mid;
+  }
+
+  return -1; //查找失败
+}
+
 int main(void)
 {
+  int A[] = {1,3,6,8,9};
+  Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
+  checkOrder(v2);
+  v2.disordered();
+  cout << v2.search(9) << endl;
 
-   int A[] = {3,3,3,3,5};
-   Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
-   checkOrder(v2);
-   v2.disordered();
-   print(v2);
-   increase(v2);
-   print(v2);
-   decrease(v2);
-   print(v2);
-   doubble(v2);
-   print(v2);
-   v2.uniquify();
-   print(v2);
-
-   cout << sum(v2) <<endl;
 }

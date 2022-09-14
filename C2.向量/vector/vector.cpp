@@ -235,4 +235,33 @@ Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
   : fibSearch(_elem, e, low, high); //Fibonacci查找算法
 }
 
+//二分查找A实现
+template <typename T> 
+static Rank binSearch(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
+  while (low < high) {
+    Rank mid = low + (high - low) / 2;
+    
+    if (e < S[mid]) high = mid; //high是尾后,访问不到[low,high),等效于mid-1
+    else if (S[mid] < e) low = mid + 1;
+    else return mid;
+  }
+  
+  return -1; //查找失败，返回一个不存在的值
+}
+
+//Fibonacci查找实现
+template <typename T>
+static Rank fibSearch(T* S, T const& e, Rank low, Rank high) {
+  cout << "fib:" <<endl;
+  for( Fib fib(high - low);low < high) { //Fibonacci数列制表（先产生一个足够大的Fib）
+    while ( high - low < fib.get() ) fib.prev(); //从后往前找到合适的Fib分割点轴点——————分摊O(1)
+    Rank mid = low + fib.get() - 1;
+
+    if(e < S[mid]) high = mid - 1; //左闭右开区间
+    else if (S[mid] < e) low = mid;
+    else return mid;
+  }
+
+  return -1; //查找失败
+}
 
