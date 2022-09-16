@@ -73,7 +73,12 @@ template <typename T>
 static Rank binSearch(T* S, T const& e, Rank low, Rank high);
 template <typename T>
 static Rank fibSearch(T* S, T const& e, Rank low, Rank high);
-
+template <typename T> 
+static Rank binSearchB(T* S, T const& e, Rank low, Rank high);
+template <typename T> 
+static Rank binSearchC(T* S, T const& e, Rank low, Rank high);
+template <typename T>
+static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi);
 
 template <typename T> void Vector<T>::copyFrom( T const* A, Rank low, Rank high)
 {
@@ -260,8 +265,8 @@ template <typename T> int Vector<T>::uniquify() { //O(n)
 //统一接口
 template <typename T> 
 Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
-  return (rand() % 2) ?  //按各50%概率调用
-    binSearch(_elem, e, low, high)  //二分查找算法，或
+  return (1) ?  //按各50%概率调用
+    insertSearch(_elem, e, low, high)  //二分查找算法，或
   : fibSearch(_elem, e, low, high); //Fibonacci查找算法
 }
 
@@ -311,12 +316,56 @@ static Rank fibSearch(T* S, T const& e, Rank low, Rank high) {
   return -1; //查找失败
 }
 
+//二分查找B实现（2次转向）
+template <typename T> 
+static Rank binSearchB(T* S, T const& e, Rank low, Rank high) {
+  while (high - low > 1) {
+    Rank mid = low + (high - low) / 2;
+
+    (e < S[mid]) ? high = mid : low = mid;
+  }
+  
+  return (e == S[low]) ? low : -1; //找到返回low，没找到返回-1；
+}
+
+//二分查找C实现(2次转向 + 语义约定：返回不大于e的秩最大值)
+template <typename T>
+static Rank binSearchC(T* S, T const& e, Rank low, Rank high) {
+  while (low < high)
+  {
+    Rank mid = low + (high - low) / 2;
+    if (e < S[mid]) high = mid; //搜索空间：[low, mid)
+    else  low = mid + 1; //搜索空间：(mid, high)
+    //看起来mid被空，但可以通过返回值修正
+  }
+  return low - 1; //返回不大于查找值e的最大值
+}
+
+//插值查找实现————闭区间 [low, high]：关键字分布不均，如{1，2，20000，20003}这样就不适合插值查找
+template <typename T>
+static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
+  --hi;
+  while (lo <= hi) {
+    Rank mi = lo + (hi - lo) * (e - S[lo]) / (S[hi] - S[lo]); //插值节点---有奇点lo == hi
+
+    if (e < S[mi])  hi = mi - 1; //[low,mid-1] <=> [low,mid)
+    else if (S[mi] < e)  lo = mi + 1; //[mid+1,low] <=> (mid,high]
+    else  return mi;
+  }
+
+  return -1;
+}//有局部病态现象，陷入死循环中，例如 e = 4,{1,3,6,8,9}
+
+
 int main(void)
 {
   int A[] = {1,3,6,8,9};
-  Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
+  Vector v2(A, end(A) - begin(A)); //自己通过A的类型T*判断模板使用
   checkOrder(v2);
   v2.disordered();
-  cout << v2.search(9) << endl;
+  int k;
+  cin >> k;
+  cout << v2.search(k) << endl;
+  print(v2);
 
 }

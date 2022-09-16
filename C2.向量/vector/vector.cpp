@@ -235,9 +235,9 @@ Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
   : fibSearch(_elem, e, low, high); //Fibonacci查找算法
 }
 
-//二分查找A实现
+//二分查找A实现（三次转向）
 template <typename T> 
-static Rank binSearch(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
+static Rank binSearchC(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
   while (low < high) {
     Rank mid = low + (high - low) / 2;
     
@@ -251,7 +251,7 @@ static Rank binSearch(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
 
 //Fibonacci查找实现
 template <typename T>
-static Rank fibSearch(T* S, T const& e, Rank low, Rank high) {
+static Rank fibSearch(T* S, T const& e, Rank low, Rank high) { //O(1.44logn)
   cout << "fib:" <<endl;
   for( Fib fib(high - low);low < high) { //Fibonacci数列制表（先产生一个足够大的Fib）
     while ( high - low < fib.get() ) fib.prev(); //从后往前找到合适的Fib分割点轴点——————分摊O(1)
@@ -265,3 +265,43 @@ static Rank fibSearch(T* S, T const& e, Rank low, Rank high) {
   return -1; //查找失败
 }
 
+//二分查找B实现（2次转向）
+template <typename T> 
+static Rank binSearchB(T* S, T const& e, Rank low, Rank high) { //O(1*logn)
+  while (high - low > 1) {
+    Rank mid = low + (high - low) / 2;
+
+    (e < S[mid]) ? high = mid : low = mid; //[low, mid) , [mid, high)
+  }
+  
+  return (e == S[low]) ? low : -1; //找到返回low，没找到返回-1；
+  //return (e < S[low]) ? low - 1 : low; //无法判别该值e是否全大于搜索空间
+}
+
+//二分查找C实现（完美版）——————界桩算法不变性：S[0,low) <= e < S[high,n)
+template <typename T>
+static Rank binSearchC(T* S, T const& e, Rank low, Rank high) {
+  while (low < high)
+  {
+    Rank mid = low + (high - low) / 2;
+    if (e < S[mid]) high = mid; //搜索空间：[low, mid)
+    else  low = mid + 1; //搜索空间：(mid, high)
+    //看起来mid被空，但可以通过返回值修正
+  }
+  return low - 1; //返回不大于查找值e的最大值
+
+  //后续可以出来后根据下标和与e判等操作，看是否找到
+}
+
+//插值查找实现————闭区间 [low, high]
+template <typename T>
+static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
+
+  while (lo < hi) {
+    Rank mi = lo + (hi - 1 - lo) * (e - S[lo]) / (S[hi - 1] - S[lo]); //插值节点
+
+    if (e < S[mi])  hi = mi; //[low,mid)
+    else lo = mi + 1; //(mid, high)
+  }
+  return lo - 1;
+}

@@ -100,12 +100,19 @@ class Fib { //Fib计算类
   Rank prev() { g = f - g; f = f - g; return g;} //转向前一项Fibonacci项 O(1)
 };
 
-//类外辅助函数
+//类外辅助函数声明
 inline Rank myMax(Rank a, Rank b) { return (a > b) ? a : b; } //内联一个比较函数
 template <typename T> void print(Vector<T> &v);//向量遍历打印
 template <typename T> void checkOrder(Vector<T> &v);//向量有序性判定
-
+/*二者同架构原理*/
 template <typename T> static Rank binSearch(T* S, T const& e, Rank low, Rank high); //二分查找A
+template <typename T> static Rank fibSearch(T* S, T const& e, Rank low, Rank high); //Fibonacci查找
+/*二者实现了减少转向分支优化*/
+template <typename T> static Rank binSearchB(T* S, T const& e, Rank low, Rank high); //二分查找B
+template <typename T> static Rank binSearchC(T* S, T const& e, Rank low, Rank high); //二分查找C————语义，性能，功能最强优化
+/*实现大规模快速收敛*/
+template <typename T> static Rank insertSearch(T* S, T const& e, Rank low, Rank high); //插值查找————小规模局部有病态
+
 
 /***********************************************************实现部分(模板类不支持分离式编译)*************************************************************/
 
