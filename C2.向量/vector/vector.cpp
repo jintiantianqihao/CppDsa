@@ -310,10 +310,10 @@ static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
 //通用接口 [low,high)<=>[0,n)
 template <typename T>
 void Vector<T>::sort(Rank low, Rank high) {
-  switch (1) {
+  switch (rand() % 6) {
     case 1:  bubbleSort(low, high); break; //冒泡排序
     case 2:  selectionSort(low, high); break; //选择排序(习题)
-    case 3:  mergeSort(low, high); //归并排序
+    case 3:  mergeSort(low, high); break;//归并排序
     
     case 4:  heapSort(low, high); break; //堆排序(C12)
     case 5:  quickSort(low, high); break; //快速排序(C14)
@@ -321,6 +321,7 @@ void Vector<T>::sort(Rank low, Rank high) {
   } //随机选择算法，并可以灵活扩充新的排序算法
 }
 
+/***冒泡排序***/
 ////冒泡排序基础版
 /*
 template <typename T>
@@ -389,3 +390,39 @@ void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(
   }
 }
 /*冒泡排序的改进主要是最外层的循环改进*/
+
+/***归并排序***/
+//归并排序算法接口（递归）
+template <typename T>
+void Vector<T>::mergeSort(Rank low, Rank high) { //O(nlogn)
+  if (high - low == 1)  //递归基（递归车起步，先系安全带）
+    return;
+  
+  Rank mid = low + (high - low) / 2;
+  mergeSort(low, mid); //[low,mid)
+  mergeSort(mid, high); //[)
+  merge(low, mid, high);
+
+  return;
+}
+
+//二路归并
+template <typename T>
+void Vector<T>:: merge(Rank low, Rank mid, Rank high) { //O(n)
+  T* A = _elem + low; Rank i = 0; //A就地
+  Rank lb = mid - low; T* B = new T[lb]; Rank j = 0; //B申请堆空间
+  for (Rank k = 0; k < mid - low; ++k) { 
+    B[k] = A[k]; 
+  } //逐个拷贝B
+  Rank lc = high - mid; T* C = _elem + mid; Rank k = 0; //C就地
+
+  while ((j < lb) && (k < lc)) { //一般情况
+    A[i++] = (B[j] > C[k]) ? C[k++] : B[j++]; //保证排序稳定性，相等时需要返回左侧的值
+  }
+  while (j < lb) { //C先排尽，还要排B；B先排尽，C可顺序就位
+    A[i++] = B[j++];
+  }
+  delete[] B; //new和delete很耗时，可用内置栈结构来代替
+
+  return;  
+}
