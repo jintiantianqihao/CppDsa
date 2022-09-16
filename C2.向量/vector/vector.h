@@ -70,7 +70,7 @@ class Vector { //向量模板类
     template <typename VST> void traverse(VST); //遍历（使用函数对象，可全局性修改）临时变量是常量引用，无法使用引用初始化
 }; //Vector
 
-//辅助类
+// 辅助类
 template <typename T> 
 class myPrint { public: virtual void operator()(T &e) { std::cout << e <<" ";}};//类外类函数对象，单个打印：通过重载操作符()实现
 
@@ -100,8 +100,9 @@ class Fib { //Fib计算类
   Rank prev() { g = f - g; f = f - g; return g;} //转向前一项Fibonacci项 O(1)
 };
 
-//类外辅助函数声明
+// 类外辅助函数声明
 inline Rank myMax(Rank a, Rank b) { return (a > b) ? a : b; } //内联一个比较函数
+template <typename T> inline void mySwap(T& a, T& b) { T temp = a; a = b; b = temp;} //内联一个交换函数
 template <typename T> void print(Vector<T> &v);//向量遍历打印
 template <typename T> void checkOrder(Vector<T> &v);//向量有序性判定
 /*二者同架构原理*/
@@ -110,7 +111,7 @@ template <typename T> static Rank fibSearch(T* S, T const& e, Rank low, Rank hig
 /*二者实现了减少转向分支优化*/
 template <typename T> static Rank binSearchB(T* S, T const& e, Rank low, Rank high); //二分查找B
 template <typename T> static Rank binSearchC(T* S, T const& e, Rank low, Rank high); //二分查找C————语义，性能，功能最强优化
-/*实现大规模快速收敛*/
+/*用于实现大规模快速收敛*/
 template <typename T> static Rank insertSearch(T* S, T const& e, Rank low, Rank high); //插值查找————小规模局部有病态
 
 

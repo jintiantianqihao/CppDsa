@@ -235,7 +235,7 @@ Rank Vector<T>::search(T const& e, Rank low, Rank high) const {
   : fibSearch(_elem, e, low, high); //Fibonacci查找算法
 }
 
-//二分查找A实现（三次转向）
+////二分查找A实现（三次转向）
 template <typename T> 
 static Rank binSearchC(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
   while (low < high) {
@@ -249,7 +249,7 @@ static Rank binSearchC(T* S, T const& e, Rank low, Rank high) { //O(1.5*logn)
   return -1; //查找失败，返回一个不存在的值
 }
 
-//Fibonacci查找实现
+////Fibonacci查找实现
 template <typename T>
 static Rank fibSearch(T* S, T const& e, Rank low, Rank high) { //O(1.44logn)
   cout << "fib:" <<endl;
@@ -265,7 +265,7 @@ static Rank fibSearch(T* S, T const& e, Rank low, Rank high) { //O(1.44logn)
   return -1; //查找失败
 }
 
-//二分查找B实现（2次转向）
+////二分查找B实现（2次转向）
 template <typename T> 
 static Rank binSearchB(T* S, T const& e, Rank low, Rank high) { //O(1*logn)
   while (high - low > 1) {
@@ -278,7 +278,7 @@ static Rank binSearchB(T* S, T const& e, Rank low, Rank high) { //O(1*logn)
   //return (e < S[low]) ? low - 1 : low; //无法判别该值e是否全大于搜索空间
 }
 
-//二分查找C实现（完美版）——————界桩算法不变性：S[0,low) <= e < S[high,n)
+////*****二分查找C实现（完美版）——————界桩算法不变性：S[0,low) <= e < S[high,n)
 template <typename T>
 static Rank binSearchC(T* S, T const& e, Rank low, Rank high) {
   while (low < high)
@@ -293,7 +293,7 @@ static Rank binSearchC(T* S, T const& e, Rank low, Rank high) {
   //后续可以出来后根据下标和与e判等操作，看是否找到
 }
 
-//插值查找实现————闭区间 [low, high]
+////插值查找实现————闭区间 [low, high]————————快速收敛查找范围
 template <typename T>
 static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
 
@@ -305,3 +305,87 @@ static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
   }
   return lo - 1;
 }
+
+/*12.排序算法*/
+//通用接口 [low,high)<=>[0,n)
+template <typename T>
+void Vector<T>::sort(Rank low, Rank high) {
+  switch (1) {
+    case 1:  bubbleSort(low, high); break; //冒泡排序
+    case 2:  selectionSort(low, high); break; //选择排序(习题)
+    case 3:  mergeSort(low, high); //归并排序
+    
+    case 4:  heapSort(low, high); break; //堆排序(C12)
+    case 5:  quickSort(low, high); break; //快速排序(C14)
+    default:  shellSort(low, high); break; //希尔排序(C14)  
+  } //随机选择算法，并可以灵活扩充新的排序算法
+}
+
+////冒泡排序基础版
+/*
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n)
+  --high;
+  while (low < high) { //输入保证[low，high]
+    for (Rank i = low; i < high; ++i) {
+      if (_elem[i] > _elem[i+1]) //逆序
+        mySwap(_elem[i], _elem[i+1]); //则交换——————步数消耗处
+    }
+    --high; //排序范围缩小
+  }
+}
+*/
+
+////冒泡排序提前终止版
+/*
+//实现接口
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  while (!bubble(low,--high));
+}
+
+//扫描交换函数
+template <typename T>
+bool Vector<T>:: bubble(Rank low, Rank high) { 
+  bool sorted = true; //整体有序标志
+  for (Rank i = low; i < high; ++i) {
+    if (_elem[i] > _elem[i+1]) { //取到high
+      mySwap(_elem[i], _elem[i+1]);
+      sorted = false;
+    }
+  }
+  return sorted;
+}
+*/
+
+//便于理解版
+/*
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  --high;
+  for(bool sorted = false; sorted == false; ) {
+    sorted = true;
+    for(Rank i = low; i < high; ++i) {
+      if (_elem[i] > _elem[i+1]) {
+        mySwap(_elem[i], _elem[i+1]);
+        sorted = false;
+      }
+    }
+  }
+}
+*/
+
+////*****冒泡排序跳跃版————跳过有序部分，仅排无序子块 转化为只排[low,last)
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  --high; //[) -> []
+  for (Rank last = high; low < high; high = last) { //一下子就跳到last，不用再亦步亦趋地1步1步保证已排序元素了
+    for (Rank i = last = low; i < high; ++i) { //从左往右排，last为最后一个无序标志，此时假定一开始地low为last，即扫描前认为整体无序
+      if (_elem[i] > _elem[i+1]) {
+        mySwap(_elem[i], _elem[i+1]);
+        last = i;
+      }
+    }
+  }
+}
+/*冒泡排序的改进主要是最外层的循环改进*/

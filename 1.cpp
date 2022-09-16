@@ -9,6 +9,8 @@ Rank myMax(Rank a, Rank b) {
    return (a > b) ? a : b;
 }
 
+template <typename T> inline void mySwap(T& a, T& b) { T temp = a; a = b; b = temp;} //内联一个交换函数
+
 template <typename T> class Vector { //向量模板类
 protected:
    Rank _size; Rank _capacity;  T* _elem; //规模、容量、数据区
@@ -356,16 +358,97 @@ static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
   return -1;
 }//有局部病态现象，陷入死循环中，例如 e = 4,{1,3,6,8,9}
 
+/*12.排序算法*/
+//通用接口 [low,high)<=>[0,n)
+template <typename T>
+void Vector<T>::sort(Rank low, Rank high) {
+  switch (1) {
+    case 1:  bubbleSort(low, high); break; //冒泡排序
+    case 2:  selectionSort(low, high); break; //选择排序(习题)
+    case 3:  mergeSort(low, high); //归并排序
+    
+    case 4:  heapSort(low, high); break; //堆排序(C12)
+    case 5:  quickSort(low, high); break; //快速排序(C14)
+    default:  shellSort(low, high); break; //希尔排序(C14)  
+  } //随机选择算法，并可以灵活扩充新的排序算法
+}
+
+////冒泡排序基础版
+/*
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n)
+  --high;
+  while (low < high) { //输入保证[low，high]
+    for (Rank i = low; i < high; ++i) {
+      if (_elem[i] > _elem[i+1]) //逆序
+        mySwap(_elem[i], _elem[i+1]); //则交换——————步数消耗处
+    }
+    --high; //排序范围缩小
+  }
+}
+*/
+
+////冒泡排序提前终止版
+/*
+//实现接口
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  while (!bubble(low,--high));
+}
+
+//扫描交换函数
+template <typename T>
+bool Vector<T>:: bubble(Rank low, Rank high) { 
+  bool sorted = true; //整体有序标志
+  for (Rank i = low; i < high; ++i) {
+    if (_elem[i] > _elem[i+1]) { //取到high
+      mySwap(_elem[i], _elem[i+1]);
+      sorted = false;
+    }
+  }
+  return sorted;
+}
+*/
+
+//便于理解版
+/*
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  --high;
+  for(bool sorted = false; sorted == false; ) {
+    sorted = true;
+    for(Rank i = low; i < high; ++i) {
+      if (_elem[i] > _elem[i+1]) {
+        mySwap(_elem[i], _elem[i+1]);
+        sorted = false;
+      }
+    }
+  }
+}
+*/
+
+////*****冒泡排序跳跃版————跳过有序部分，仅排无序子块 转化为只排[low,last)
+
+template <typename T>
+void Vector<T>::bubbleSort(Rank low, Rank high) { //最坏：O(n^2)  最好：O(n) 但特殊情况下偏向O(n)
+  --high; //[) -> []
+  for (Rank last = high; low < high; high = last) { //一下子就跳到last，不用再亦步亦趋地1步1步保证已排序元素了
+    for (Rank i = last = low; i < high; ++i) { //从左往右排，last为最后一个无序标志
+      if (_elem[i] > _elem[i+1]) {
+        mySwap(_elem[i], _elem[i+1]);
+        last = i;
+      }
+    }
+  }
+}
+/*冒泡排序的改进主要是最外层的循环改进*/
 
 int main(void)
 {
-  int A[] = {1,3,6,8,9};
+  int A[] = {7,3,4,2,1,9};
   Vector v2(A, end(A) - begin(A)); //自己通过A的类型T*判断模板使用
   checkOrder(v2);
-  v2.disordered();
-  int k;
-  cin >> k;
-  cout << v2.search(k) << endl;
   print(v2);
-
+  v2.sort();
+  print(v2);
 }
