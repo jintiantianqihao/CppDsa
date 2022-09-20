@@ -6,10 +6,11 @@
 template <typename T> 
 class List { //列表模板类
 
-private:
-   int _size; ListNodePosi<T> header, trailer; //规模、头哨兵、尾哨兵
+ private:
+   int _size; //头哨兵、尾哨兵
+   ListNodePosi<T> header, trailer; //规模
 
-protected:
+ protected:
    void init(); //列表创建时的初始化
    int clear(); //清除所有节点
    void copyNodes ( ListNodePosi<T>, int ); //复制列表中自位置p起的n项
@@ -19,14 +20,16 @@ protected:
    void insertionSort ( ListNodePosi<T>, int ); //对从p开始连续的n个节点插入排序
    void radixSort(ListNodePosi<T>, int); //对从p开始连续的n个节点基数排序
 
-public:
+ public:
 // 构造函数
    List() { init(); } //默认
    List ( List<T> const& L ); //整体复制列表L
    List ( List<T> const& L, Rank r, int n ); //复制列表L中自第r项起的n项
    List ( ListNodePosi<T> p, int n ); //复制列表中自位置p起的n项
+
 // 析构函数
    ~List(); //释放（包含头、尾哨兵在内的）所有节点
+
 // 只读访问接口
    Rank size() const { return _size; } //规模
    bool empty() const { return _size <= 0; } //判空
@@ -43,6 +46,7 @@ public:
    ListNodePosi<T> search ( T const& e, int n, ListNodePosi<T> p ) const; //有序区间查找
    ListNodePosi<T> selectMax ( ListNodePosi<T> p, int n ); //在p及其n-1个后继中选出最大者
    ListNodePosi<T> selectMax() { return selectMax ( header->succ, _size ); } //整体最大者
+
 // 可写访问接口
    ListNodePosi<T> insertAsFirst ( T const& e ); //将e当作首节点插入
    ListNodePosi<T> insertAsLast ( T const& e ); //将e当作末节点插入
@@ -55,10 +59,17 @@ public:
    int deduplicate(); //无序去重
    int uniquify(); //有序去重
    void reverse(); //前后倒置（习题）
+
 // 遍历
    void traverse ( void (* ) ( T& ) ); //遍历，依次实施visit操作（函数指针，只读或局部性修改）
    template <typename VST> //操作器
    void traverse ( VST& ); //遍历，依次实施visit操作（函数对象，可全局性修改）
 }; //List
+
+
+
+//****************************************************************实现部分*********************************************************************//
+
+
 
 #endif

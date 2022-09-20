@@ -69,8 +69,8 @@ void shift1(int *A, int n, int k)
  */
 void shift2(int *A, int n, int k)
 {
-  myReverse(A, k);//O(3/2*k)
-  myReverse(A + k, n - k);//O(3/2*(n - k))
+  myReverse(A, k % n);//O(3/2*k)
+  myReverse(A + k % n, n - k % n);//O(3/2*(n - k))
   myReverse(A, n);//O(3/2*n)
 }
 

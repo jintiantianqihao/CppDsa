@@ -20,22 +20,30 @@ class ListNode { //列表节点模板类
         : data(e), pre(p), suc(s) {}; //默认构造器
   
 //操作接口
-  ListNodePosi<T> pred() { return this->pre; } //获得前驱节点位置
-  ListNodePosi<T> succ() { return this->suc; }
-  T data() { return this->data; } //获得当前节点索寸数据对象
+  ListNodePosi<T> pred() { return pre; } //获得前驱节点位置
+  ListNodePosi<T> succ() { return suc; }
+  T data() { return data; } //获得当前节点索寸数据对象
 
   ListNodePosi<T> insertAsPred(T const& e); //插入前驱节点，返回其位置
-  ListNodePosi<T> insertAsSucc(T const& e);
+  ListNodePosi<T> insertAsSucc(T const& e); //插入后继节点，返回其位置
 };
 
 template <typename T> 
 ListNodePosi<T> ListNode<T>::insertAsPred(T const& e) {
+  ListNodePosi<T> temp = new ListNode<T> (e, pre, this); //开辟堆空间，设置新节点
+  pre->suc = temp; 
+  pre = temp; //修正链接
 
+  return temp;
 }
 
+template <typename T>
+ListNodePosi<T> ListNode<T>::insertAsSucc(T const& e) {
+  ListNodePosi<T> temp = new ListNode<T> (e, this, suc);
+  suc->pre = temp;
+  suc = temp; //this->suc = temp;
 
-
-
-
-
+  return temp;
+}
+/*节点插入流程：1.申请堆空间 2.调整链接*/
 #endif

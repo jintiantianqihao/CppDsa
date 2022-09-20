@@ -1,44 +1,37 @@
 #include <iostream>
 using namespace std;
+using Rank = int;
 
-typedef unsigned Positive;//非负数化实义命名
-
-//fib 函数实现
-/*1.二分递归法 ： O(2^n) */
-Positive fib1(Positive n)
-{
-  return (n < 2) ? n : fib1(n - 1) + fib1(n - 2);
+void mySwap(Rank &a, Rank &b) {
+  Rank temp = a;
+  a = b;
+  b = temp;
 }
 
-/*2.线性迭代法：O(n)----"上台阶"*/
-Positive fib2(Positive n)
-{
-  Positive f = 1, g = 0;
-  if(n == 0) 
-    return g;
-  --n;
-  while ( n-- > 0)
-  {
-    f = f + g;
-    g = f - g;
-  }
+void myReverse(Rank* A, Rank size) {
+  Rank low = 0, high = size;
 
-  
-  return f;
+  while (low < high)
+    mySwap(A[low++], A[--high]);
   
 }
 
-int main(void)
-{
-  int n = 0;
-  cout << "请输入计算值：" << endl;
-  cin >> n;
+int main() {
 
+  Rank n = 0, k = 0;
+  cin >> n >> k;
+  Rank A[n];
   for (size_t i = 0; i < n; ++i) {
-    cout << "fib(" << i << ") = " << fib1(i) <<endl;
-    //cout << "fib(" << i << ") = " << fib2(i) <<endl;
+    cin >> A[i];
   }
   
+  myReverse(A, n);
+  myReverse(A, k % n);
+  myReverse(A + k % n, n - k % n);
+
+  for (Rank i = 0; i < n; ++i) {
+    (i == n-1) ? (cout << A[i]) : (cout << A[i] << " ");
+  }
   
   return 0;
-} 
+}
