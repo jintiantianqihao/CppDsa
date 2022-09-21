@@ -297,7 +297,6 @@ template <typename T> Rank sum(Vector<T> &v) { int sumValue = 0; v.traverse( myS
 
 int main(void)
 {
-
    int A[] = {1,2,3,4,5};
    Vector v2(A, end(A) - begin(A));//自己通过A的类型T*判断模板使用
    print(v2);
@@ -471,13 +470,12 @@ static Rank insertSearch(T* S, T const& e, Rank lo, Rank hi) {
 template <typename T>
 void Vector<T>::sort(Rank low, Rank high) {
   switch (3) {
-    case 1:  bubbleSort(low, high); break;    //冒泡排序
-    case 2:  selectionSort(low, high); break; //选择排序(习题)
-    case 3:  mergeSort(low, high); break;     //归并排序
-    
-    case 4:  heapSort(low, high); break;      //堆排序(C12)
-    case 5:  quickSort(low, high); break;     //快速排序(C14)
-    default:  shellSort(low, high); break;    //希尔排序(C14)  
+    case 1: bubbleSort(low, high); break;    //冒泡排序
+    case 2: selectionSort(low, high); break; //选择排序(习题)
+    case 3: mergeSort(low, high); break;     //归并排序
+    case 4: heapSort(low, high); break;      //堆排序(C12)
+    case 5: quickSort(low, high); break;     //快速排序(C14)
+    default: shellSort(low, high); break;    //希尔排序(C14)
   } //随机选择算法，并可以灵活扩充新的排序算法
 }
 
