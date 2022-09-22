@@ -1,6 +1,7 @@
 #ifndef LISTNODE_H
 #define LISTNODE_H
 
+//调用多个头文件时，注意作用域啊；另外，尽量使用对外的函数接口访问操作类内私有变量，避免出错
 using Rank = int; //秩
 
 template <typename T> class ListNode;
