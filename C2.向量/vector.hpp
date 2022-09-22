@@ -40,7 +40,7 @@ class Vector { //向量模板类,循秩访问
     Vector(Vector<T> const &V, Rank low, Rank high) { copyFrom(V._elem, low, high); } //区间
 
     // 析构函数
-    ~Vector() { delete[] _elem; _elem = NULL;}                                        //释放内部空间,并防止野指针
+    ~Vector() { delete[] _elem; _elem = nullptr;}                                        //释放内部空间,并防止野指针
 
 // 只读访问接口
     Rank size() const { return _size; }                                               //规模
