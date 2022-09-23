@@ -33,20 +33,21 @@ class List { //列表模板类
    ~List() { clear(); delete header; delete tailer; } //释放（包含头、尾哨兵在内的）所有节点
 
    // 只读访问接口
-   Rank size() const { return _size; }                                         //规模
-   bool empty() const { return _size <= 0; }                                   //判空
-   T &operator[](Rank r) const;                                                //重载，支持循秩访问（效率低）
-   ListNodePosi<T> first() const { return header->succ(); }                    //首节点位置
-   ListNodePosi<T> last() const { return tailer->pred(); }                     //末节点位置
-   bool valid(ListNodePosi<T> p)                                               //判断位置p是否对外合法
-   { return p && (tailer != p) && (header != p); }                             //将头、尾节点等同于nullptr
-   ListNodePosi<T> find(T const &e) const { return find(e, _size, tailer); }   //无序列表查找
-   ListNodePosi<T> find(T const &e, int n, ListNodePosi<T> p) const;           //无序区间向前查找
-   ListNodePosi<T> find(T const &e, ListNodePosi<T> p, int n) const;           //无序区间向后查找
-   ListNodePosi<T> search(T const &e) const { return find(e, _size, tailer); } //有序列表查找
-   ListNodePosi<T> search(T const &e, int n, ListNodePosi<T> p) const;         //有序区间查找
-   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n);                        //在p及其n-1个后继中选出最大者
-   ListNodePosi<T> selectMax() { return selectMax(header->succ(), _size); }    //整体最大者
+   Rank size() const { return _size; }                                           //规模
+   bool empty() const { return _size <= 0; }                                     //判空
+   T &operator[](Rank r) const;                                                  //重载，支持循秩访问（效率低）
+   ListNodePosi<T> first() const { return header->succ(); }                      //首节点位置
+   ListNodePosi<T> last() const { return tailer->pred(); }                       //末节点位置
+   bool valid(ListNodePosi<T> p)                                                 //判断位置p是否对外合法
+   { return p && (tailer != p) && (header != p); }                               //将头、尾节点等同于nullptr
+   ListNodePosi<T> find(T const &e) const { return find(e, _size, tailer); }     //无序列表查找
+   ListNodePosi<T> find(T const &e, int n, ListNodePosi<T> p) const;             //无序区间向前查找
+   ListNodePosi<T> find(T const &e, ListNodePosi<T> p, int n) const;             //无序区间向后查找
+   ListNodePosi<T> search(T const &e) const { return search(e, _size, tailer); } //有序列表查找
+   ListNodePosi<T> search(T const &e, int n, ListNodePosi<T> p) const;           //有序区间向前查找
+   ListNodePosi<T> search(T const &e, ListNodePosi<T> p, int n) const;           //有序区间向后查找
+   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n);                          //在p及其n-1个后继中选出最大者
+   ListNodePosi<T> selectMax() { return selectMax(header->succ(), _size); }      //整体最大者
 
    // 可写访问接口
    ListNodePosi<T> insertAsFirst(T const &e);             //将e当作首节点插入
@@ -69,6 +70,7 @@ class List { //列表模板类
 
 //辅助函数
 template <typename T> void print(ListNodePosi<T> const&);
+template <typename T> void swap(T& , T&);
 //辅助类
 template <typename T>
 class myPrint {
@@ -196,7 +198,7 @@ int List<T>::deduplicate() { // O(n^2)
   int oldSize = _size;
   Rank r = 0;
   for (ListNodePosi<T> p = first(); p != tailer; p = p->succ()) { // O(n)
-    ListNodePosi<T> q = find(p->data(), r, p);                      // O(n)
+    ListNodePosi<T> q = find(p->data(), r, p);                    // O(n)
     q ? remove(q) : ++r;
   }
   return oldSize - _size; //返回删除的重复元素数量
@@ -211,11 +213,124 @@ void List<T>::traverse(VST visit) {
   return;
 }
 
-//函数对象实现遍历打印*****************************************理解如何调用的
+//函数对象实现遍历打印**(理解如何调用的)
 template <typename T>
 void print(List<T> &L) {
   L.traverse(myPrint<T>()); //相当于传入了一种操作
   cout << endl;
 }
+
+/**********************有序列表************************/
+/*8.有序列表去重*/
+template <typename T>
+int List<T>::uniquify() { //O(n)
+  if(_size < 2) return 0; //保证至少有两个节点，平凡情况直接略过
+  Rank oldSize = _size;
+  ListNodePosi<T> p = first();
+  for(ListNodePosi<T> q = p->succ(); q != tailer; q = p->succ()) {
+    if (p->data() == q->data())
+      remove(q);
+    else
+      p = p->succ();
+  }
+
+  return oldSize - _size;
+}
+
+/*9.有序列表查找*/
+////可定义语义：返回不大于e的秩最大者
+//向前查找
+template <typename T>
+ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { //O(n)
+  for (Rank i = 0; i < n; ++i) {
+    p = p->pred();
+    if (p->data() <= e)
+      break;
+  }
+  return p;
+}
+
+//向后查找
+template <typename T>
+ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { //O(n)
+  for (Rank i = 0; i < n; ++i) {
+    p = p->pred();
+    if (p->data() <= e)
+      break;
+  }
+  return p;
+}
+
+//************************************排序算法**********************************************//
+//统一接口
+template <typename T>
+void List<T>::sort(ListNodePosi<T> p, int n) {
+  switch (0) {
+    case 0:                
+      selectionSort(p, n); //选择排序
+      break;               
+    case 1:                
+      insertionSort(p, n); //插入排序
+      break;               
+    case 2:                
+      mergeSort(p, n);     //归并排序
+      break;               
+    default:               
+      radixSort(p, n);     //基数排序
+      break;
+  }
+}
+
+/*10.选择排序算法（待优化）*/
+//从p往前排n个————p+n
+//交换
+template <typename T> void swap(T& a, T& b) {
+  T temp = a;
+  a = b;
+  b = temp;
+}
+
+//求最大值————油画算法（含p的前n个数）
+template <typename T>
+ListNodePosi<T> List<T>::selectMax(ListNodePosi<T> p, int n) {
+  ListNodePosi<T> maxPosi = p;
+  while (--n) { //排n-1次
+    p = p->pred();
+    if (maxPosi->data() <= p->data())
+      maxPosi = p;
+  }
+  return maxPosi;
+}
+
+/*
+//高new、delete消耗法
+template <typename T>
+void List<T>::selectionSort(ListNodePosi<T> p, int n) {
+  ListNodePosi<T> head = p->pred(), tail = p; //确定排序区间(head,tail) = [p,p+n)--->统一头尾哨兵语义
+  for (int i = 0; i < n; ++i)
+    tail = tail->succ(); //找到尾部界桩
+
+  while (n > 1) { //排n-1次就行啦
+    insert(remove(selectMax(tail->pred(), n)), tail); //找到最大值删除，将返回值插在tail前：O(100)
+    tail = tail->pred();
+    --n;
+  }
+}
+*/
+
+//只交换数据域，小优化
+template <typename T>
+void List<T>::selectionSort(ListNodePosi<T> p, int n) {
+  ListNodePosi<T> head = p->pred(), tail = p; //确定排序区间(head,tail) = [p,p+n)--->统一头尾哨兵语义
+  for (int i = 0; i < n; ++i)
+    tail = tail->succ(); //找到尾部界桩
+
+  while (n > 1) { //排n-1次就行啦
+    swap(selectMax(tail->pred(), n)->data(), tail->pred()->data()); //和tail前的值交换
+    tail = tail->pred();
+    --n;
+  }
+}
+
 
 #endif

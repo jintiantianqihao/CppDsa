@@ -11,19 +11,19 @@ using ListNodePosi = ListNode<T> *; //列表节点位置
 template <typename T>
 class ListNode { //列表节点模板类
  private:
-  T elem;              //数值
-  ListNodePosi<T> pre; //前驱节点
-  ListNodePosi<T> suc; //后继节点
+   T elem;                        //数值
+   ListNodePosi<T> pre = nullptr; //前驱节点
+   ListNodePosi<T> suc = nullptr; //后继节点
 
  public:
    //构造函数
-   //ListNode {}; //默认构造函数，针对头节点header和尾节点trailer构造
-   ListNode(T e = 0, ListNodePosi<T> p = nullptr, ListNodePosi<T> s = nullptr) //////////////?????????模板类型如何定义默认初始化呀
+   ListNode() {}; //默认构造函数，针对头节点header和尾节点trailer构造
+   ListNode(T e, ListNodePosi<T> p = nullptr, ListNodePosi<T> s = nullptr) //////////////?????????模板类型如何定义默认初始化呀
        : elem(e), pre(p), suc(s){}; //默认构造器
 
    //操作接口
    ListNodePosi<T>& pred() { return pre; } //获得前驱节点位置
-   ListNodePosi<T>& succ() { return suc; } //获得后继节点位置
+   ListNodePosi<T>& succ() { return suc; } //获得后继节点位置——————作为可修改的左值
    T& data() { return elem; }              //获得当前节点所存数据对象
 
    ListNodePosi<T> insertAsPred(T const &e); //插入前驱节点，返回其位置
