@@ -52,8 +52,8 @@ class List { //列表模板类
    // 可写访问接口
    ListNodePosi<T> insertAsFirst(T const &e);             //将e当作首节点插入
    ListNodePosi<T> insertAsLast(T const &e);              //将e当作末节点插入
-   ListNodePosi<T> insert(ListNodePosi<T> p, T const &e); //将e当作p的后继插入
-   ListNodePosi<T> insert(T const &e, ListNodePosi<T> p); //将e当作p的前驱插入
+   ListNodePosi<T> insertAfter(ListNodePosi<T> p, T const &e); //将e当作p的后继插入
+   ListNodePosi<T> insertBefore(T const &e, ListNodePosi<T> p); //将e当作p的前驱插入
    T remove(ListNodePosi<T> p);                           //删除合法位置p处的节点,返回被删除节点
    void merge(List<T> &L) { merge(header->succ(), _size, L, L.header->succ(), L._size); } //全列表归并
    void sort(ListNodePosi<T> p, int n);  //列表区间排序
@@ -70,7 +70,7 @@ class List { //列表模板类
 
 //辅助函数
 template <typename T> void print(ListNodePosi<T> const&);
-template <typename T> void swap(T& , T&);
+template <typename T> void mySwap(T& , T&);
 //辅助类
 template <typename T>
 class myPrint {
@@ -111,25 +111,25 @@ void List<T>::init() { //初始化，创建列表对象时统一调用
 /*3.插入函数*/
 //向前插入
 template <typename T>
-ListNodePosi<T> List<T>::insert(T const &e, ListNodePosi<T> p) { //O(1)
+ListNodePosi<T> List<T>::insertBefore(T const &e, ListNodePosi<T> p) { //O(1)
   ++_size;
   return p->insertAsPred(e); //链接已调整好，因为双向链表能向前回溯的缘故，因此不用利用快慢指针来实现了
 }
 //向后插入————————————插入的时候就已经扩充容量了，因此这里都是在基本操作上封装好的，不用在进行其他调用时扩容了，否则会冗余，导致容量不匹配*********************
 template <typename T>
-ListNodePosi<T> List<T>::insert( ListNodePosi<T> p, T const &e) { //O(1)
+ListNodePosi<T> List<T>::insertAfter( ListNodePosi<T> p, T const &e) { //O(1)
   ++_size;
   return p->insertAsSucc(e); //链接已调整好，因为双向链表能向前回溯的缘故，因此不用利用快慢指针来实现了
 }
 //头插法
 template <typename T>
 ListNodePosi<T> List<T>::insertAsFirst(T const &e) { //O(1)
-  return insert(header, e);
+  return insertAfter(header, e);
 }
 //尾插法
 template <typename T>
 ListNodePosi<T> List<T>::insertAsLast(T const &e) { //O(1)
-  return insert(e, tailer);
+  return insertBefore(e, tailer);
 }
 
 //列表复制函数（构造调用）
@@ -239,33 +239,35 @@ int List<T>::uniquify() { //O(n)
 
 /*9.有序列表查找*/
 ////可定义语义：返回不大于e的秩最大者
-//向前查找
+//向前查找-->查不含p的前n个
 template <typename T>
-ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { //O(n)
+ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { // O(n)
+  p = p->pred();
   for (Rank i = 0; i < n; ++i) {
-    p = p->pred();
     if (p->data() <= e)
       break;
+    p = p->pred();
   }
   return p;
 }
 
 //向后查找
 template <typename T>
-ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { //O(n)
-  for (Rank i = 0; i < n; ++i) {
-    p = p->pred();
-    if (p->data() <= e)
-      break;
-  }
-  return p;
+ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { // O(n)
+  p = p->pred();
+  for (Rank i = 0; i < n; ++i) { // for (Rank i = 0; i < n; ++i) {
+    if (p->data() <= e)          //   p = p->pred();
+      break;                     //    if(p->data <= e)  ////要考虑边界情况呀，细节错误，警钟长鸣！
+    p = p->pred();               //       break;
+  }                              //  }
+  return p;                      //***没有考虑边界情况，未充分发挥break作用
 }
 
 //************************************排序算法**********************************************//
 //统一接口
 template <typename T>
 void List<T>::sort(ListNodePosi<T> p, int n) {
-  switch (0) {
+  switch (1) {
     case 0:                
       selectionSort(p, n); //选择排序
       break;               
@@ -281,10 +283,11 @@ void List<T>::sort(ListNodePosi<T> p, int n) {
   }
 }
 
-/*10.选择排序算法（待优化）*/
+/*10.选择排序算法（待优化）*///交换是核心
 //从p往前排n个————p+n
 //交换
-template <typename T> void swap(T& a, T& b) {
+template <typename T>
+void mySwap(T &a, T &b) {
   T temp = a;
   a = b;
   b = temp;
@@ -311,12 +314,15 @@ void List<T>::selectionSort(ListNodePosi<T> p, int n) {
     tail = tail->succ(); //找到尾部界桩
 
   while (n > 1) { //排n-1次就行啦
-    insert(remove(selectMax(tail->pred(), n)), tail); //找到最大值删除，将返回值插在tail前：O(100)
+    insertBefore(remove(selectMax(tail->pred(), n)), tail); //找到最大值删除，将返回值插在tail前：O(100) //本质是以插入实现交换
     tail = tail->pred();
     --n;
   }
 }
 */
+
+//修改tail和max局部引用优化
+
 
 //只交换数据域，小优化
 template <typename T>
@@ -326,11 +332,23 @@ void List<T>::selectionSort(ListNodePosi<T> p, int n) {
     tail = tail->succ(); //找到尾部界桩
 
   while (n > 1) { //排n-1次就行啦
-    swap(selectMax(tail->pred(), n)->data(), tail->pred()->data()); //和tail前的值交换
+    mySwap( selectMax(tail->pred(), n)->data(), tail->pred()->data() ); //和tail前的值交换
     tail = tail->pred();
     --n;
   }
 }
 
+/*11.插入排序算法*///插入是核心操作
+//对从p开始连续的n个节点插入排序（定位+插入---含p）
+//低效new、delete版
+template <typename T>
+void List<T>::insertionSort(ListNodePosi<T> p, int n) { //O(n^2)
+  p = p->succ();           //确定排序区间 [p,p+n),但此处第一个无需排好,这里的p即为tail
+  for (int r = 1; r < n; ++r) {
+    insertAfter( search(p->data(), r, p), p->data() ); //稳定性保障了：O(i)~~O(i+100)
+    p = p->succ();
+    remove(p->pred()); // O(1)~~实际上O(100)
+  }                    // 就地算法，辅助空间复杂度O(1);
+}
 
 #endif

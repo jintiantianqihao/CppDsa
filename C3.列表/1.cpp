@@ -7,8 +7,8 @@ int main()
 {
   List<int> l;
   if (l.empty())
-    for (Rank i = 0; i < 7; ++i) {
-      l.insertAsLast(7 - i);
+    for (Rank i = 0; i < 5; ++i) {
+      l.insertAsLast(5 - i);
     }
   print(l);
 
