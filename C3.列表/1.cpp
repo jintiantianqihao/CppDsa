@@ -12,7 +12,6 @@ int main()
     }
   print(l);
 
-
   l.sort();
   print(l);
 }

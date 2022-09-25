@@ -267,7 +267,7 @@ ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { //
 //统一接口
 template <typename T>
 void List<T>::sort(ListNodePosi<T> p, int n) {
-  switch (1) {
+  switch (2) {
     case 0:                
       selectionSort(p, n); //选择排序
       break;               
@@ -351,4 +351,38 @@ void List<T>::insertionSort(ListNodePosi<T> p, int n) { //O(n^2)
   }                    // 就地算法，辅助空间复杂度O(1);
 }
 
+/*12.归并排序算法*///分治+二路归并是核心
+//主体算法
+//对从p开始连续的n个节点归并排序(含p)
+template <typename T>
+void List<T>::mergeSort(ListNodePosi<T> &p, int n) { //O(nlogn),但是极度占栈空间，相当于以空间换时间了,利用主定理
+  if (n < 2) return; //递归基
+
+  int m = n / 2;
+  ListNodePosi<T> q = p;
+  for (int i = 0; i < m; ++i)  q = q->succ(); //找到分治中点 O(m)=O(n)
+
+  mergeSort(p, m);
+  mergeSort(q, n - m);              //分治
+  p = merge(p, m, *this, q, n - m); //二路归并：O(r)
+  return;
+}
+
+//二路归并
+template <typename T>
+ListNodePosi<T> List<T>::merge(ListNodePosi<T> p, int n, List<T> &L, ListNodePosi<T> q, int m) { //O(n)
+  ListNodePosi<T> phead = p->pred();
+  while ((n > 0) && (m > 0)) {
+    if (q->data() < p->data()) {
+      insertBefore(q->data(), p); //考虑此处排序稳定性能保障
+      q = q->succ();
+      L.remove(q->pred());
+      --m; //对应好谁是谁的计数下标！！！！！！不要张冠李戴！！！！！（全是细节）
+    } else {
+      p = p->succ();
+      --n;
+    }
+  }
+  return phead->succ();
+}
 #endif
