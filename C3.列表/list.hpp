@@ -50,11 +50,11 @@ class List { //列表模板类
    ListNodePosi<T> selectMax() { return selectMax(header->succ(), _size); }      //整体最大者
 
    // 可写访问接口
-   ListNodePosi<T> insertAsFirst(T const &e);             //将e当作首节点插入
-   ListNodePosi<T> insertAsLast(T const &e);              //将e当作末节点插入
-   ListNodePosi<T> insertAfter(ListNodePosi<T> p, T const &e); //将e当作p的后继插入
+   ListNodePosi<T> insertAsFirst(T const &e);                   //将e当作首节点插入
+   ListNodePosi<T> insertAsLast(T const &e);                    //将e当作末节点插入
+   ListNodePosi<T> insertAfter(ListNodePosi<T> p, T const &e);  //将e当作p的后继插入
    ListNodePosi<T> insertBefore(T const &e, ListNodePosi<T> p); //将e当作p的前驱插入
-   T remove(ListNodePosi<T> p);                           //删除合法位置p处的节点,返回被删除节点
+   T remove(ListNodePosi<T> p);                                 //删除合法位置p处的节点,返回被删除节点
    void merge(List<T> &L) { merge(header->succ(), _size, L, L.header->succ(), L._size); } //全列表归并
    void sort(ListNodePosi<T> p, int n);  //列表区间排序
    void sort() { sort(first(), _size); } //列表整体排序
@@ -82,6 +82,19 @@ public:
 
 
 //****************************************************************实现部分*********************************************************************//
+
+
+/*0.双向列表前后倒置算法*/
+template <typename T>
+void List<T>::reverse() { //O(n)
+  if (empty()) return;
+  ListNodePosi<T> head = first(), tail = last();
+  while ((head != tail) && (head->pred() != tail)) {
+    mySwap(head->data(), tail->data());
+    head = head->succ();
+    tail = tail->pred();
+  }
+}
 
 
 /*1.重载下标操作符，循秩访问（低效，仅作为左值访问）*/
@@ -322,7 +335,6 @@ void List<T>::selectionSort(ListNodePosi<T> p, int n) {
 */
 
 //修改tail和max局部引用优化
-
 
 //只交换数据域，小优化
 template <typename T>

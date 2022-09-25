@@ -11,7 +11,6 @@ int main()
       l.insertAsLast(5 - i);
     }
   print(l);
-
-  l.sort();
+  l.reverse();
   print(l);
 }
