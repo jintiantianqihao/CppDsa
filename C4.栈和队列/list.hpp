@@ -1,6 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <iostream>
 #include "listnode.hpp" //引入列表节点类
 using std::cout,std::endl;
 
@@ -72,13 +73,9 @@ class List { //列表模板类
 template <typename T> void print(ListNodePosi<T> const&);
 template <typename T> void mySwap(T& , T&);
 //辅助类
-template <typename T>
-class myPrint {
-public:
-  virtual void operator()(T &e) {
-    cout << e << " ";
-  }
-};
+
+template <typename T> class myPrint; //只做一次声明
+
 
 
 //****************************************************************实现部分*********************************************************************//
@@ -300,12 +297,14 @@ void List<T>::sort(ListNodePosi<T> p, int n) {
 /*10.选择排序算法（待优化）*///交换是核心
 //从p往前排n个————p+n
 //交换
+/*
 template <typename T>
 void mySwap(T &a, T &b) {
   T temp = a;
   a = b;
   b = temp;
 }
+*/
 
 //求最大值————油画算法（含p的前n个数）
 template <typename T>
