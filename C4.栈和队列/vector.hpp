@@ -321,7 +321,7 @@ int main(void)
 template <typename T>
 void checkOrder(Vector<T> &v) {
   Rank unsorted = 0;                      //逆序数计数器
-  v.traverse(CheckOrder(unsorted, v[0])); //统计紧邻逆序对
+  v.traverse(CheckOrder<T>(unsorted, v[0])); //统计紧邻逆序对
   if (unsorted > 0)
     cout << "Unsorted with " << unsorted << " adjacent inversion(s)" << endl;
   else

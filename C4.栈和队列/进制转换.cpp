@@ -5,6 +5,8 @@
 
 using namespace std;
 
+//逆序输出
+
 void convert(Stack<char> &s, int64_t n, unsigned base); //十进制数转换为任意进制数
 void print(Stack<char> &s); //输出转换后的10进制数
 
