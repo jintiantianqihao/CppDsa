@@ -3,8 +3,9 @@
 #include<string>
 #include<cmath>
 
-
 using namespace std;
+
+using strPtr = string::const_iterator; //为方便传入const值和非const值，故采用const形参
 
 // Function to convert Infix expression to postfix 
 string InfixToPostfix(const string &expression);
@@ -17,6 +18,9 @@ bool IsOperator(char C);
 
 // Function to verify whether a character is alphanumeric chanaracter (letter or numeric digit) or not. 
 bool IsOperand(char C);
+
+//读数函数
+void readNumber(stack<double> &stk, strPtr &p);
 
 //运算函数
 double rpnEvaluate(const string &RPN);     //计算式
@@ -41,7 +45,7 @@ string InfixToPostfix(const string &expression) {
   // Declaring a Stack from Standard template library in C++.
   stack<char> S;
   string postfix = ""; // Initialize postfix as empty string.
-  for (int i = 0; i < expression.length(); i++) {
+  for (int i = 0; i < expression.length(); ++i) {
 
     // Scanning each character from left.
     // If character is a delimitter, move on.
@@ -110,13 +114,19 @@ int GetOperatorWeight(char op) {
     case '+':
     case '-':
       weight = 1;
+      break;
     case '*':
     case '/':
       weight = 2;
+      break;
     case '^':
       weight = 3;
+      break;
     case '!':
       weight = 4;
+      break;
+    default:
+      break;
   }
   return weight;
 }
@@ -191,22 +201,9 @@ double rpnEvaluate(const string &RPN) {
   auto end = RPN.end();
 
   while (begin != end) {
-    if (IsOperand(*begin)) {                           //操作数读入————readNumber()---传入迭代器的引用即可
-      operand.push(static_cast<double>(*begin - '0')); //当前数位入栈
-      while (IsOperand(*(++begin))) {
-        double temp = 10 * operand.top() + static_cast<double>(*begin - '0');
-        operand.pop();
-        operand.push(temp);          //栈中数弹出进位，新数值重新入栈
-      }                              //后续数字紧邻
-      if ((*begin) != '.') continue; //后位数非小数点，则以整数返回
-      double fraction = 1;
-      while (IsOperand(*(++begin))) { //小数点后数字紧邻
-        fraction /= 10;
-        double temp = operand.top() + (*begin - '0') * fraction;
-        operand.pop();
-        operand.push(temp); //小数点后数字入栈
-      }
-    } else if (IsOperator(*begin)) { //操作符情况
+    if (IsOperand(*begin))                           //操作数读入————readNumber()---传入迭代器的引用即可
+      readNumber(operand, begin);
+     else if (IsOperator(*begin)) { //操作符情况
       if (*begin == '!') {
         double temp = calcu(*begin, operand.top());
         operand.pop();
@@ -232,4 +229,22 @@ double rpnEvaluate(const string &RPN) {
     return -1;
   }
   // return operand.top();
+}
+
+//读数函数
+void readNumber(stack<double> &stk, strPtr &p) {
+  stk.push(static_cast<double>(*p - '0')); //当前数位入栈
+  while (IsOperand(*(++p))) {
+    double temp = 10 * stk.top() + static_cast<double>(*p - '0');
+    stk.pop();
+    stk.push(temp);        //栈中数弹出进位，新数值重新入栈
+  }                        //后续数字紧邻
+  if ((*p) != '.') return; //后位数非小数点，则以整数返回
+  double fraction = 1;
+  while (IsOperand(*(++p))) { //小数点后数字紧邻
+    fraction /= 10;
+    double temp = stk.top() + (*p - '0') * fraction;
+    stk.pop();
+    stk.push(temp); //小数点后数字入栈
+  }
 }
