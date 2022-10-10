@@ -197,13 +197,13 @@ int facI(int n) {
 // RPN计算
 double rpnEvaluate(const string &RPN) {
   stack<double> operand;
-  auto begin = RPN.begin();
-  auto end = RPN.end();
+  auto begin = RPN.begin(); // auto关键字自动匹配类型
+  auto end = RPN.end();     // auto关键字自动匹配类型
 
   while (begin != end) {
-    if (IsOperand(*begin))                           //操作数读入————readNumber()---传入迭代器的引用即可
+    if (IsOperand(*begin)) //操作数读入————readNumber()---传入迭代器的引用即可
       readNumber(operand, begin);
-     else if (IsOperator(*begin)) { //操作符情况
+    else if (IsOperator(*begin)) { //操作符情况
       if (*begin == '!') {
         double temp = calcu(*begin, operand.top());
         operand.pop();
