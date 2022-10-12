@@ -167,7 +167,7 @@ void Vector<T>::expand() {                        //向量空间不足时扩容
   _capacity = myMax(_capacity, DEFAULT_CAPACITY); //往大处扩容
 
   T *oldElem = _elem;
-  _elem = new T[_capacity / 2]; //移位法扩大一倍
+  _elem = new T[_capacity *= 2]; //移位法扩大一倍
   for (Rank i = 0; i < _size; ++i) {
     _elem[i] = oldElem[i];
   }

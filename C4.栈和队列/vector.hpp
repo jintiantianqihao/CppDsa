@@ -34,14 +34,14 @@ class Vector { //向量模板类,循秩访问
  public:
    // 构造函数
    Vector(int c = DEFAULT_CAPACITY, Rank s = 0, T v = 0) //容量为c、规模为s、所有元素初始为v
-   { _elem = new T[_capacity = c]; for (_size = 0; _size < s; _elem[_size++] = v); }  //s<=c                                                                                // s<=c
+   { _elem = new T[_capacity = c]; for (_size = 0; _size < s; _elem[_size++] = v); }  //s<=c
     Vector(T const *A, Rank n) { copyFrom(A, 0, n); }                                 //数组整体复制
     Vector(T const *A, Rank low, Rank high) { copyFrom(A, low, high); }               //区间
     Vector(Vector<T> const &V) { copyFrom(V._elem, 0, V._size); }                     //向量整体复制
     Vector(Vector<T> const &V, Rank low, Rank high) { copyFrom(V._elem, low, high); } //区间
 
     // 析构函数
-    ~Vector() { delete[] _elem; _elem = nullptr;}                                        //释放内部空间,并防止野指针
+    ~Vector() { delete[] _elem; _elem = nullptr;}                                     //释放内部空间,并防止野指针
 
 // 只读访问接口
     Rank size() const { return _size; }                                               //规模
@@ -168,7 +168,8 @@ void Vector<T>::expand() {                        //向量空间不足时扩容
   _capacity = myMax(_capacity, DEFAULT_CAPACITY); //往大处扩容
 
   T *oldElem = _elem;
-  _elem = new T[_capacity / 2]; //移位法扩大一倍
+  _capacity *= 2; //移位法扩大一倍
+  _elem = new T[_capacity]; 
   for (Rank i = 0; i < _size; ++i) {
     _elem[i] = oldElem[i];
   }
@@ -384,7 +385,7 @@ int Vector<T>::uniquify() { //O(n^2)
 //统一接口
 template <typename T>
 Rank Vector<T>::search(T const &e, Rank low, Rank high) const {
-  return (rand() % 2) ?                                 //按各50%概率调用
+  return (1) ?                                 //按各50%概率调用
              binSearchC(_elem, e, low, high)            //二分查找算法，或
                       : fibSearch(_elem, e, low, high); // Fibonacci查找算法
 }
