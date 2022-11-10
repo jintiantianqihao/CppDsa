@@ -368,6 +368,7 @@ int Vector<T>::uniquify() { // O(n)
 
   return oldSize - _size; //返回删除元素隔个数
 }
+
 //低效版
 /*
 template <typename T> 
