@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include "binnode.hpp"
-using std::cin, std::cout, std::endl;
+using std::cin;
+using std::cout;
+using std::endl;
+
+
+
 
 #endif

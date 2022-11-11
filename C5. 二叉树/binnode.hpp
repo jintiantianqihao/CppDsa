@@ -35,8 +35,8 @@ class BinNode { //二叉树节点模板类
 
    T &data() { return elem; }              //获得当前节点所存数据对象————可修改的左值
    BinNodePosi<T> &parent() { return pt; } //获得当前节点的父节点位置
-   BinNodePosi<T> &lChild() { return lc; }   //获得当前节点的左子节点位置
-   BinNodePosi<T> &rChild() { return rc; }   //获得当前节点的右子节点位置
+   BinNodePosi<T> &lChild() { return lc; } //获得当前节点的左子节点位置
+   BinNodePosi<T> &rChild() { return rc; } //获得当前节点的右子节点位置
    int &height() { return ht; }            //获得当前节点高度
    int &getNpl() { return npl; }           //获得当前节点左氏堆值
    RBColor &getColor() { return color; }   //获得当前节点的颜色
@@ -47,14 +47,32 @@ class BinNode { //二叉树节点模板类
    template <typename VST> void travPost(VST &);  //子树后序遍历
 
    //比较器、判等器（操作符重载）
-   bool operator< (BinNode const &bn) {return elem < bn.data();}   //重载小于号
-   bool operator> (BinNode const &bn) {return elem > bn.data();}   //重载大于号
-   bool operator== (BinNode const &bn) {return elem == bn.data();} //判等重载
-   bool operator!= (BinNode const &bn) {return elem != bn.data();} //不等重载
-   bool operator>= (BinNode const &bn) {return elem >= bn.data();} //重载大于等于号
-   bool operator<= (BinNode const &bn) {return elem <= bn.data();} //重载小于等于号
+   bool operator< (BinNode const &bn) {return elem < bn.elem;}   //重载小于号
+   bool operator> (BinNode const &bn) {return elem > bn.elem;}   //重载大于号
+   bool operator== (BinNode const &bn) {return elem == bn.elem;} //判等重载
+   bool operator!= (BinNode const &bn) {return elem != bn.elem;} //不等重载
+   bool operator>= (BinNode const &bn) {return elem >= bn.elem;} //重载大于等于号
+   bool operator<= (BinNode const &bn) {return elem <= bn.elem;} //重载小于等于号
 };
 /********************************函数实现************************************/
 
+template <typename T>
+BinNodePosi<T> BinNode<T>::insertAsLC(T const &e) {
+  return lc = new BinNode(e, this); //调用构造函数
+} //O(1)
+
+template <typename T>
+BinNodePosi<T> BinNode<T>::insertAsRC(T const &e) {
+  return rc = new BinNode(e, this); //调用构造函数
+} //O(1)
+
+//递归实现后代节点总数求解
+template <typename T> int BinNode<T>:: size() { //O(n) = O(|size|)
+  int s = 1; //计算自身
+  if (lc != nullptr)  return s += lc->size(); //递归计入左子树规模
+  if (rc != nullptr)  return s += rc->size(); //递归计入右子树规模
+
+  return s;
+}
 
 #endif
