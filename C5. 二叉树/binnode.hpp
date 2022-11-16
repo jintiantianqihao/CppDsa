@@ -63,7 +63,7 @@ BinNodePosi<T> BinNode<T>::insertAsLC(T const &e) {
 
 template <typename T>
 BinNodePosi<T> BinNode<T>::insertAsRC(T const &e) {
-  return rc = new BinNode(e, this); //调用构造函数
+  return rc = new BinNode(e, this); //调用构造函数实现子链接父
 } //O(1)
 
 //递归实现后代节点总数求解

@@ -2,7 +2,7 @@
 using namespace std;
 
 //辅助函数
-int max(int const &a,int const &b) {
+int max(const int &a,const int &b) {
   return (a > b) ? a : b;
 }
 

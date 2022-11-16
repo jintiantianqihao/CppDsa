@@ -8,7 +8,7 @@ using std::cout;
 using std::endl;
 
 //辅助函数
-int max(int const &a, int const &b) {
+int max(const int &a, const int &b) { //const在引用左侧修饰的是&底层const，但本身可变；const在引用右侧修饰的是a，引用本身不可变但指向的值可变
   return (a > b) ? a : b;
 }
 
@@ -21,7 +21,7 @@ class BinTree { //二叉树类
   int _size;            //规模
   BinNodePosi<T> _root; //根节点
 
-  //定义空树高度（只在类内调用）————用内联函数替换宏定义，在编译时就进行替换，效率和宏函数相当
+  //***********定义空树高度（只在类内调用）————用内联函数替换宏定义，在编译时就进行替换，效率和宏函数相当
   inline int stature(BinNodePosi<T> p) { (p == nullptr) ? -1 : p->height(); } //此处也可以不用inline，类内直接内联
 
   //树内部迭代
@@ -35,9 +35,12 @@ class BinTree { //二叉树类
   ~BinTree() { if(_size > 0) remove(root); } //析构函数
 
   //操作函数
-  int size() const { return _size; }      //规模获取————函数后const表示函数不可修改类内成员
-  bool empty() const { return !_root; }   //判空
-  BinNodePosi<T> root() { return _root; } //树根获取
+  int size() const { return _size; }            //规模获取————函数后const表示函数不可修改类内成员
+  bool empty() const { return !_root; }         //判空
+  BinNodePosi<T> root() const { return _root; } //树根获取
+
+  BinNodePosi<T> insert(BinNodePosi<T> x, T const &e); //右孩子插入:insertAsRC
+  BinNodePosi<T> insert(T const &e, BinNodePosi<T> x); //左孩子插入:insertAsLC
 };
 
 //***************************************实现部分*************************************************//
@@ -51,7 +54,7 @@ int BinTree<T>::updateHeight(BinNodePosi<T> x) { //O(1):普通二叉树的高度
 
 //2.节点x及其祖先高度依次更新(全树高度更新)
 template <typename T>
-void BinTree<T>::updataHeightAbove(BinNodePosi<T> x) {
+void BinTree<T>::updataHeightAbove(BinNodePosi<T> x) { //O(n = height):最大高度遍历——————最深叶节点加子树啦
   while (x != root()) {
     updataHeight(x);
     x = x->parent();
@@ -59,6 +62,27 @@ void BinTree<T>::updataHeightAbove(BinNodePosi<T> x) {
   updateHeight(root());
 
   return;
+}
+
+////3.节点插入函数
+//insertAsRC
+template <typename T>
+BinNodePosi<T> BinTree<T>::insert(BinNodePosi<T> x, T const &e) {
+  ++_size;              //插入前先判断，此处默认x右子树空，插入必成功
+  x->insertAsRC(e);     //插入做右子树(在此处就完成了右子树更新，具体见binnode实现)
+  updataHeightAbove(x); // x及其祖先节点高度可能变，其余节点必不变；
+
+  return x->rChild();
+}
+
+//insertAsLC
+template <typename T>
+BinNodePosi<T> BinTree<T>::insert(T const &e, BinNodePosi<T> x) {
+  ++_size;              //插入前先判断，此处默认x左子树空，插入必成功
+  x->insertAsLC(e);     //插入做右子树(在此处就完成了右子树更新，具体见binnode实现)
+  updataHeightAbove(x); // x及其祖先节点高度可能变，其余节点必不变；
+
+  return x->lChild();
 }
 
 #endif
