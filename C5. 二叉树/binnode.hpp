@@ -5,8 +5,11 @@ enum RBColor { RB_RED,
                RB_BLACK }; //红黑树节点颜色
 
 template <typename T> class BinNode; //预先声明类
-template <typename T>
-using BinNodePosi = BinNode<T> *; //节点位置
+template <typename T> using BinNodePosi = BinNode<T> *; //节点位置
+
+//辅助函数————计算节点后代数
+template <typename T> int getNodeSize(BinNodePosi<T> node);
+
 
 template <typename T>
 class BinNode { //二叉树节点模板类
@@ -28,7 +31,7 @@ class BinNode { //二叉树节点模板类
     data(e), pnt(p), lc(l), rc(r), ht(h), npl(npl), color(c) {} //带参data构造函数
 
    //操作接口
-   int size();                            //统计当前节点后代数，即其根子树规模
+   //int size();                            //统计当前节点后代数，即其根子树规模（非空节点方能调用，空节点默认size为0）
    BinNodePosi<T> insertAsLC(T const &e); //将元素e当作当前节点的左孩子插入为新节点
    BinNodePosi<T> insertAsRC(T const &e); //将元素e当作当前节点的右孩子插入为新节点
    BinNodePosi<T> succ();                 //（中序遍历意义下）当前节点的直接后继节点
@@ -56,6 +59,15 @@ class BinNode { //二叉树节点模板类
 };
 /********************************函数实现************************************/
 
+////辅助函数
+//递归实现后代节点总数求解
+template <typename T>
+int getNodeSize(BinNodePosi<T> node) { // O(n) = O(|size|)
+  if (node == nullptr) return 0; //考虑边界奇异情况：空节点
+  return getNodeSize(node->lChild()) + getNodeSize(node->rChild());
+}
+
+////成员函数
 template <typename T>
 BinNodePosi<T> BinNode<T>::insertAsLC(T const &e) {
   return lc = new BinNode(e, this); //调用构造函数
@@ -66,13 +78,17 @@ BinNodePosi<T> BinNode<T>::insertAsRC(T const &e) {
   return rc = new BinNode(e, this); //调用构造函数实现子链接父
 } //O(1)
 
+/*
 //递归实现后代节点总数求解
-template <typename T> int BinNode<T>:: size() { //O(n) = O(|size|)
+template <typename T> 
+int BinNode<T>:: size() { //O(n) = O(|size|)
+
   int s = 1; //计算自身
-  if (lc != nullptr)  return s += lc->size(); //递归计入左子树规模
-  if (rc != nullptr)  return s += rc->size(); //递归计入右子树规模
+  if (lc != nullptr)  s += lc->size(); //递归计入左子树规模
+  if (rc != nullptr)  s += rc->size(); //递归计入右子树规模
 
   return s;
 }
+*/
 
 #endif
