@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include "listnode.hpp" //引入列表节点类
-using std::cout,std::endl;
+using std::cout;
+using std::endl;
 
 template <typename T>
 class List { //列表模板类

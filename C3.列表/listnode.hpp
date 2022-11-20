@@ -5,8 +5,10 @@
 using Rank = int; //秩
 
 template <typename T> class ListNode;
-template <typename T>
-using ListNodePosi = ListNode<T> *; //列表节点位置
+template <typename T> using ListNodePosi = ListNode<T> *; //列表节点位置
+
+//list类事先声明，便于后面声明友元类
+template <typename T> class List;
 
 template <typename T>
 class ListNode { //列表节点模板类
@@ -14,6 +16,7 @@ class ListNode { //列表节点模板类
    T elem;                        //数值
    ListNodePosi<T> pre = nullptr; //前驱节点
    ListNodePosi<T> suc = nullptr; //后继节点
+   friend class List<T>;          //声明友元类，便于接口封装
 
  public:
    //构造函数
