@@ -47,8 +47,8 @@ class List { //列表模板类
    ListNodePosi<T> search(T const &e) const { return search(e, _size, tailer); } //有序列表查找
    ListNodePosi<T> search(T const &e, int n, ListNodePosi<T> p) const;           //有序区间向前查找
    ListNodePosi<T> search(T const &e, ListNodePosi<T> p, int n) const;           //有序区间向后查找
-   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n);                          //在p及其n-1个后继中选出最大者
-   ListNodePosi<T> selectMax() { return selectMax(header->succ(), _size); }      //整体最大者
+   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n) const;                          //在p及其n-1个后继中选出最大者
+   ListNodePosi<T> selectMax() const { return selectMax(header->succ(), _size); }      //整体最大者
 
    // 可写访问接口
    ListNodePosi<T> insertAsFirst(T const &e);                   //将e当作首节点插入
@@ -92,7 +92,7 @@ void List<T>::reverse() { //O(n)
   if (empty()) return;
   ListNodePosi<T> head = first(), tail = last();
   while ((head != tail) && (head->pred() != tail)) {
-    mySwap(head->data(), tail->data());
+    mySwap(head->elem, tail->elem); //需要修改值，不可用常量，利用友元类
     head = head->succ();
     tail = tail->pred();
   }
@@ -107,7 +107,7 @@ T& List<T>::operator[](Rank r) const { // O(n)
     temp = temp->succ();
   }
 
-  return temp->data();
+  return temp->elem;
 }
 
 /*2.列表初始化*/
@@ -117,10 +117,10 @@ void List<T>::init() { //初始化，创建列表对象时统一调用
   tailer = new ListNode<T>; //创建头节点哨兵
   _size = 0;                //初始化规模
 
-  header->succ() = tailer;
-  header->pred() = nullptr; //互联
-  tailer->pred() = header;
-  tailer->succ() = nullptr; //封装写法header->succ() = tailer; header->pred() = nullptr;
+  header->suc = tailer;
+  header->pre = nullptr; //互联
+  tailer->pre = header;
+  tailer->suc = nullptr; //封装写法header->succ() = tailer; header->pred() = nullptr;
 }
 
 /*3.插入函数*/
@@ -153,19 +153,19 @@ template <typename T>
 void List<T>::copyNodes(ListNodePosi<T> p, int n) { // O(n)
   init();                                           //隐性传入了this指针
 
-  while (_size < n) {        // while (_size++ < n) {
-    insertAsLast(p->data()); // insertAsLast(p->data()); *****************插入操作已经扩容啦，条件里就别再乱来啦
-    p = p->succ();           // p = p->succ();
-  }                          //}
+  while (_size < n) {      // while (_size++ < n) {
+    insertAsLast(p->elem); // insertAsLast(p->elem); *****************插入操作已经扩容啦，条件里就别再乱来啦
+    p = p->succ();         // p = p->succ();
+  }                        //}
 }
 
 /*4.列表节点删除*/
 //删除函数
 template <typename T>
 T List<T>::remove(ListNodePosi<T> p) { //O(1)
-  T e = p->data();
-  p->succ()->pred() = p->pred();
-  p->pred()->succ() = p->succ();
+  T e = p->elem;
+  p->suc->pre = p->pre;
+  p->pre->suc = p->suc;
 
   delete p; //写入nullptr操作在规模较大时容易影响效率，一般在申请空间前做判断或赋初值即可
   --_size;  //规模缩减调整
@@ -187,7 +187,7 @@ int List<T>::clear() { // O(n)
 template <typename T>
 ListNodePosi<T> List<T>::find(T const &e, int n, ListNodePosi<T> p) const { //O(n)
   while (n-- > 0) { 
-    if (e == p->pred()->data()) { //找到
+    if (e == p->pred()->elem) { //找到
       return p->pred();
     } else
       p = p->pred(); //前向递增
@@ -213,7 +213,7 @@ int List<T>::deduplicate() { // O(n^2)
   int oldSize = _size;
   Rank r = 0;
   for (ListNodePosi<T> p = first(); p != tailer; p = p->succ()) { // O(n)
-    ListNodePosi<T> q = find(p->data(), r, p);                    // O(n)
+    ListNodePosi<T> q = find(p->elem, r, p);                    // O(n)
     q ? remove(q) : ++r;
   }
   return oldSize - _size; //返回删除的重复元素数量
@@ -224,7 +224,7 @@ template <typename T>
 template <typename VST>
 void List<T>::traverse(VST visit) {
   for (ListNodePosi<T> temp = first(); temp != tailer; temp = temp->succ())
-    visit(temp->data());
+    visit(temp->elem);
   return;
 }
 
@@ -243,7 +243,7 @@ int List<T>::uniquify() { //O(n)
   Rank oldSize = _size;
   ListNodePosi<T> p = first();
   for(ListNodePosi<T> q = p->succ(); q != tailer; q = p->succ()) {
-    if (p->data() == q->data())
+    if (p->elem == q->elem)
       remove(q);
     else
       p = p->succ();
@@ -259,7 +259,7 @@ template <typename T>
 ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { // O(n)
   p = p->pred();
   for (Rank i = 0; i < n; ++i) {
-    if (p->data() <= e)
+    if (p->elem <= e)
       break;
     p = p->pred();
   }
@@ -271,7 +271,7 @@ template <typename T>
 ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { // O(n)
   p = p->pred();
   for (Rank i = 0; i < n; ++i) { // for (Rank i = 0; i < n; ++i) {
-    if (p->data() <= e)          //   p = p->pred();
+    if (p->elem <= e)          //   p = p->pred();
       break;                     //    if(p->data <= e)  ////要考虑边界情况呀，细节错误，警钟长鸣！
     p = p->pred();               //       break;
   }                              //  }
@@ -310,11 +310,11 @@ void mySwap(T &a, T &b) {
 
 //求最大值————油画算法（含p的前n个数）
 template <typename T>
-ListNodePosi<T> List<T>::selectMax(ListNodePosi<T> p, int n) {
+ListNodePosi<T> List<T>::selectMax(ListNodePosi<T> p, int n) const {
   ListNodePosi<T> maxPosi = p;
   while (--n) { //排n-1次
     p = p->pred();
-    if (maxPosi->data() <= p->data())
+    if (maxPosi->elem <= p->elem)
       maxPosi = p;
   }
   return maxPosi;
@@ -346,7 +346,7 @@ void List<T>::selectionSort(ListNodePosi<T> p, int n) {
     tail = tail->succ(); //找到尾部界桩
 
   while (n > 1) { //排n-1次就行啦
-    mySwap( selectMax(tail->pred(), n)->data(), tail->pred()->data() ); //和tail前的值交换
+    mySwap( selectMax(tail->pred(), n)->elem, tail->pred()->elem ); //和tail前的值交换
     tail = tail->pred();
     --n;
   }
@@ -359,7 +359,7 @@ template <typename T>
 void List<T>::insertionSort(ListNodePosi<T> p, int n) { //O(n^2)
   p = p->succ();           //确定排序区间 [p,p+n),但此处第一个无需排好,这里的p即为tail
   for (int r = 1; r < n; ++r) {
-    insertAfter( search(p->data(), r, p), p->data() ); //稳定性保障了：O(i)~~O(i+100)
+    insertAfter( search(p->elem, r, p), p->elem ); //稳定性保障了：O(i)~~O(i+100)
     p = p->succ();
     remove(p->pred()); // O(1)~~实际上O(100)
   }                    // 就地算法，辅助空间复杂度O(1);
@@ -387,8 +387,8 @@ template <typename T>
 ListNodePosi<T> List<T>::merge(ListNodePosi<T> p, int n, List<T> &L, ListNodePosi<T> q, int m) { //O(n)
   ListNodePosi<T> phead = p->pred();
   while ((n > 0) && (m > 0)) {
-    if (q->data() < p->data()) {
-      insertBefore(q->data(), p); //考虑此处排序稳定性能保障
+    if (q->elem < p->elem) {
+      insertBefore(q->elem, p); //考虑此处排序稳定性能保障
       q = q->succ();
       L.remove(q->pred());
       --m; //对应好谁是谁的计数下标！！！！！！不要张冠李戴！！！！！（全是细节）
