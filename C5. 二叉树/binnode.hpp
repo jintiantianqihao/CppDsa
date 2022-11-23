@@ -29,8 +29,8 @@ class BinNode { //二叉树节点模板类
   //构造函数
    BinNode() : 
     pt(nullptr), lc(nullptr), rc(nullptr), ht(0), npl(1), color(RB_RED) {}                                                                                                                         //默认构造函数
-   BinNode(T e, BinNodePosi<T> p = nullptr, BinNodePosi<T> l = nullptr, BinNodePosi<T> r = nullptr, int h = 0; int npl = 1; RBColor c = RB_RED) : 
-    data(e), pnt(p), lc(l), rc(r), ht(h), npl(npl), color(c) {} //带参data构造函数
+   BinNode(T e, BinNodePosi<T> p = nullptr, BinNodePosi<T> l = nullptr, BinNodePosi<T> r = nullptr, int h = 0, int n = 1, RBColor c = RB_RED) : 
+    elem(e), pt(p), lc(l), rc(r), ht(h), npl(n), color(c) {} //带参data构造函数
 
    //操作接口
    //int size();                            //统计当前节点后代数，即其根子树规模（非空节点方能调用，空节点默认size为0）
@@ -38,13 +38,14 @@ class BinNode { //二叉树节点模板类
    BinNodePosi<T> insertAsRC(const T &e); //将元素e当作当前节点的右孩子插入为新节点
    BinNodePosi<T> succ();                 //（中序遍历意义下）当前节点的直接后继节点
 
+  //只读接口
    T data() const { return elem; }              //获得当前节点所存数据对象
-   BinNodePosi<T> parent() { return pt; } //获得当前节点的父节点位置
-   BinNodePosi<T> lChild() { return lc; } //获得当前节点的左子节点位置
-   BinNodePosi<T> rChild() { return rc; } //获得当前节点的右子节点位置
-   int &height() { return ht; }            //获得当前节点高度
-   int &getNpl() { return npl; }           //获得当前节点左氏堆值
-   RBColor &getColor() { return color; }   //获得当前节点的颜色
+   BinNodePosi<T> parent() const { return pt; } //获得当前节点的父节点位置
+   BinNodePosi<T> lChild() const { return lc; } //获得当前节点的左子节点位置
+   BinNodePosi<T> rChild() const { return rc; } //获得当前节点的右子节点位置
+   int height() const { return ht; }            //获得当前节点高度
+   int getNpl() const { return npl; }           //获得当前节点左氏堆值
+   RBColor getColor() const { return color; }   //获得当前节点的颜色
 
    template <typename VST> void travLevel(VST &); //子树层次遍历
    template <typename VST> void travPre(VST &);   //子树先序遍历
@@ -52,12 +53,12 @@ class BinNode { //二叉树节点模板类
    template <typename VST> void travPost(VST &);  //子树后序遍历
 
    //比较器、判等器（操作符重载）
-   bool operator<(BinNode const &bn) { return elem < bn.elem; }   //重载小于号
-   bool operator>(BinNode const &bn) { return elem > bn.elem; }   //重载大于号
-   bool operator==(BinNode const &bn) { return elem == bn.elem; } //判等重载
-   bool operator!=(BinNode const &bn) { return elem != bn.elem; } //不等重载
-   bool operator>=(BinNode const &bn) { return elem >= bn.elem; } //重载大于等于号
-   bool operator<=(BinNode const &bn) { return elem <= bn.elem; } //重载小于等于号
+   bool operator<(const BinNode &bn) { return elem < bn.elem; }   //重载小于号
+   bool operator>(const BinNode &bn) { return elem > bn.elem; }   //重载大于号
+   bool operator==(const BinNode &bn) { return elem == bn.elem; } //判等重载
+   bool operator!=(const BinNode &bn) { return elem != bn.elem; } //不等重载
+   bool operator>=(const BinNode &bn) { return elem >= bn.elem; } //重载大于等于号
+   bool operator<=(const BinNode &bn) { return elem <= bn.elem; } //重载小于等于号
 };
 /********************************函数实现************************************/
 
@@ -66,7 +67,7 @@ class BinNode { //二叉树节点模板类
 template <typename T>
 int getNodeSize(BinNodePosi<T> node) { // O(n) = O(|size|)
   if (node == nullptr) return 0; //考虑边界奇异情况：空节点
-  return getNodeSize(node->lChild()) + getNodeSize(node->rChild() + 1);
+  return getNodeSize(node->lChild()) + getNodeSize(node->rChild()) + 1;
 }
 
 ////成员函数
