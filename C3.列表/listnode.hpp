@@ -30,13 +30,13 @@ class ListNode { //列表节点模板类
    const ListNodePosi<T> succ() const { return suc; } //获得后继节点位置
    T data() const { return elem; }                    //获得当前节点所存数据对象
 
-   ListNodePosi<T> insertAsPred(T const &e); //插入前驱节点，返回其位置
-   ListNodePosi<T> insertAsSucc(T const &e); //插入后继节点，返回其位置
+   ListNodePosi<T> insertAsPred(const T &e); //插入前驱节点，返回其位置
+   ListNodePosi<T> insertAsSucc(const T &e); //插入后继节点，返回其位置
 };
 
 //实现部分
 template <typename T>
-ListNodePosi<T> ListNode<T>::insertAsPred(T const &e) { // O(1)
+ListNodePosi<T> ListNode<T>::insertAsPred(const T &e) { // O(1)
   ListNodePosi<T> temp = new ListNode<T>(e, pre, this); //开辟堆空间，设置新节点
   pre->suc = temp;
   pre = temp; //修正链接
@@ -45,7 +45,7 @@ ListNodePosi<T> ListNode<T>::insertAsPred(T const &e) { // O(1)
 }
 
 template <typename T>
-ListNodePosi<T> ListNode<T>::insertAsSucc(T const &e) { // O(1)
+ListNodePosi<T> ListNode<T>::insertAsSucc(const T &e) { // O(1)
   ListNodePosi<T> temp = new ListNode<T>(e, this, suc); //该步消耗较大
   suc->pre = temp;
   suc = temp; // this->suc = temp;

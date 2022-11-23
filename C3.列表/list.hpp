@@ -1,6 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <iostream>
 #include "listnode.hpp" //引入列表节点类
 using std::cout;
 using std::endl;
@@ -25,8 +26,8 @@ class List { //列表模板类
  public:
    // 构造函数
    List() { init(); }                                         //默认
-   List(List<T> const &L) { copyNodes(L.first(), L.size()); } //整体复制列表L
-   List(List<T> const &L, Rank r, int n)                      //复制列表L中自第r项起的n项
+   List(const List<T> &L) { copyNodes(L.first(), L.size()); } //整体复制列表L
+   List(const List<T> &L, Rank r, int n)                      //复制列表L中自第r项起的n项
    { ListNodePosi<T> p = L.first(); Rank k = 0; while (k++ < r) p = p->succ(); copyNodes(p, n); } //header最好不要在外暴露，仅在特殊情况下使用，考虑清楚边界情况啊                         
    List(ListNodePosi<T> p, int n) { copyNodes(p, n); }        //复制列表中自位置p起的n项
 
@@ -41,20 +42,20 @@ class List { //列表模板类
    ListNodePosi<T> last() const { return tailer->pred(); }                       //末节点位置
    bool valid(ListNodePosi<T> p)                                                 //判断位置p是否对外合法
    { return p && (tailer != p) && (header != p); }                               //将头、尾节点等同于nullptr
-   ListNodePosi<T> find(T const &e) const { return find(e, _size, tailer); }     //无序列表查找
-   ListNodePosi<T> find(T const &e, int n, ListNodePosi<T> p) const;             //无序区间向前查找
-   ListNodePosi<T> find(T const &e, ListNodePosi<T> p, int n) const;             //无序区间向后查找
-   ListNodePosi<T> search(T const &e) const { return search(e, _size, tailer); } //有序列表查找
-   ListNodePosi<T> search(T const &e, int n, ListNodePosi<T> p) const;           //有序区间向前查找
-   ListNodePosi<T> search(T const &e, ListNodePosi<T> p, int n) const;           //有序区间向后查找
+   ListNodePosi<T> find(const T &e) const { return find(e, _size, tailer); }     //无序列表查找
+   ListNodePosi<T> find(const T &e, int n, ListNodePosi<T> p) const;             //无序区间向前查找
+   ListNodePosi<T> find(const T &e, ListNodePosi<T> p, int n) const;             //无序区间向后查找
+   ListNodePosi<T> search(const T &e) const { return search(e, _size, tailer); } //有序列表查找
+   ListNodePosi<T> search(const T &e, int n, ListNodePosi<T> p) const;           //有序区间向前查找
+   ListNodePosi<T> search(const T &e, ListNodePosi<T> p, int n) const;           //有序区间向后查找
    ListNodePosi<T> selectMax(ListNodePosi<T> p, int n) const;                          //在p及其n-1个后继中选出最大者
    ListNodePosi<T> selectMax() const { return selectMax(header->succ(), _size); }      //整体最大者
 
    // 可写访问接口
-   ListNodePosi<T> insertAsFirst(T const &e);                   //将e当作首节点插入
-   ListNodePosi<T> insertAsLast(T const &e);                    //将e当作末节点插入
-   ListNodePosi<T> insertAfter(ListNodePosi<T> p, T const &e);  //将e当作p的后继插入
-   ListNodePosi<T> insertBefore(T const &e, ListNodePosi<T> p); //将e当作p的前驱插入
+   ListNodePosi<T> insertAsFirst(const T &e);                   //将e当作首节点插入
+   ListNodePosi<T> insertAsLast(const T &e);                    //将e当作末节点插入
+   ListNodePosi<T> insertAfter(ListNodePosi<T> p, const T &e);  //将e当作p的后继插入
+   ListNodePosi<T> insertBefore(const T &e, ListNodePosi<T> p); //将e当作p的前驱插入
    T remove(ListNodePosi<T> p);                                 //删除合法位置p处的节点,返回被删除节点
    void merge(List<T> &L) { merge(header->succ(), _size, L, L.header->succ(), L._size); } //全列表归并
    void sort(ListNodePosi<T> p, int n);  //列表区间排序
@@ -70,7 +71,7 @@ class List { //列表模板类
 };// List
 
 //辅助函数
-template <typename T> void print(ListNodePosi<T> const&);
+template <typename T> void print(const ListNodePosi<T> &);
 template <typename T> void mySwap(T& , T&);
 //辅助类
 template <typename T>
@@ -126,24 +127,24 @@ void List<T>::init() { //初始化，创建列表对象时统一调用
 /*3.插入函数*/
 //向前插入
 template <typename T>
-ListNodePosi<T> List<T>::insertBefore(T const &e, ListNodePosi<T> p) { //O(1)
+ListNodePosi<T> List<T>::insertBefore(const T &e, ListNodePosi<T> p) { //O(1)
   ++_size;
   return p->insertAsPred(e); //链接已调整好，因为双向链表能向前回溯的缘故，因此不用利用快慢指针来实现了
 }
 //向后插入————————————插入的时候就已经扩充容量了，因此这里都是在基本操作上封装好的，不用在进行其他调用时扩容了，否则会冗余，导致容量不匹配*********************
 template <typename T>
-ListNodePosi<T> List<T>::insertAfter( ListNodePosi<T> p, T const &e) { //O(1)
+ListNodePosi<T> List<T>::insertAfter( ListNodePosi<T> p, const T &e) { //O(1)
   ++_size;
   return p->insertAsSucc(e); //链接已调整好，因为双向链表能向前回溯的缘故，因此不用利用快慢指针来实现了
 }
 //头插法
 template <typename T>
-ListNodePosi<T> List<T>::insertAsFirst(T const &e) { //O(1)
+ListNodePosi<T> List<T>::insertAsFirst(const T &e) { //O(1)
   return insertAfter(header, e);
 }
 //尾插法
 template <typename T>
-ListNodePosi<T> List<T>::insertAsLast(T const &e) { //O(1)
+ListNodePosi<T> List<T>::insertAsLast(const T &e) { //O(1)
   return insertBefore(e, tailer);
 }
 
@@ -185,7 +186,7 @@ int List<T>::clear() { // O(n)
 /*5.无序列表查找*/
 //前向查找
 template <typename T>
-ListNodePosi<T> List<T>::find(T const &e, int n, ListNodePosi<T> p) const { //O(n)
+ListNodePosi<T> List<T>::find(const T &e, int n, ListNodePosi<T> p) const { //O(n)
   while (n-- > 0) { 
     if (e == p->pred()->elem) { //找到
       return p->pred();
@@ -197,7 +198,7 @@ ListNodePosi<T> List<T>::find(T const &e, int n, ListNodePosi<T> p) const { //O(
 
 //后向查找(若重复则返回秩最小者)
 template <typename T>
-ListNodePosi<T> List<T>::find(T const &e, ListNodePosi<T> p, int n) const { //O(n)
+ListNodePosi<T> List<T>::find(const T &e, ListNodePosi<T> p, int n) const { //O(n)
   while (n-- > 0) { 
     if (e == p->succ()->data) { //找到
       return p->succ();
@@ -256,7 +257,7 @@ int List<T>::uniquify() { //O(n)
 ////可定义语义：返回不大于e的秩最大者
 //向前查找-->查不含p的前n个
 template <typename T>
-ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { // O(n)
+ListNodePosi<T> List<T>::search(const T &e, int n, ListNodePosi<T> p) const { // O(n)
   p = p->pred();
   for (Rank i = 0; i < n; ++i) {
     if (p->elem <= e)
@@ -268,7 +269,7 @@ ListNodePosi<T> List<T>::search(T const &e, int n, ListNodePosi<T> p) const { //
 
 //向后查找
 template <typename T>
-ListNodePosi<T> List<T>::search(T const &e, ListNodePosi<T> p, int n) const { // O(n)
+ListNodePosi<T> List<T>::search(const T &e, ListNodePosi<T> p, int n) const { // O(n)
   p = p->pred();
   for (Rank i = 0; i < n; ++i) { // for (Rank i = 0; i < n; ++i) {
     if (p->elem <= e)          //   p = p->pred();

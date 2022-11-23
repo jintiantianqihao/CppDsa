@@ -34,7 +34,7 @@ class BinNode { //二叉树节点模板类
   //构造函数
    BinNode() : 
     pt(nullptr), lc(nullptr), rc(nullptr), ht(0), npl(1), color(RB_RED) {}                                                                                                                         //默认构造函数
-   BinNode(T e, BinNodePosi<T> p = nullptr, BinNodePosi<T> l = nullptr, BinNodePosi<T> r = nullptr, int h = 0; int npl = 1; RBColor c = RB_RED) : 
+   BinNode(T e, BinNodePosi<T> p = nullptr, BinNodePosi<T> l = nullptr, BinNodePosi<T> r = nullptr, int h = 0, int npl = 1, RBColor c = RB_RED) : 
     data(e), pnt(p), lc(l), rc(r), ht(h), npl(npl), color(c) {} //带参data构造函数
 
    //操作接口

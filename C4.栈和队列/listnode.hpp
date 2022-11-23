@@ -5,8 +5,10 @@
 using Rank = int; //秩
 
 template <typename T> class ListNode;
-template <typename T>
-using ListNodePosi = ListNode<T> *; //列表节点位置
+template <typename T> using ListNodePosi = ListNode<T> *; //列表节点位置
+
+//list类事先声明，便于后面声明友元类
+template <typename T> class List;
 
 template <typename T>
 class ListNode { //列表节点模板类
@@ -14,17 +16,19 @@ class ListNode { //列表节点模板类
    T elem;                        //数值
    ListNodePosi<T> pre = nullptr; //前驱节点
    ListNodePosi<T> suc = nullptr; //后继节点
+    
+   friend class List<T>;          //声明友元类，便于接口封装
 
  public:
    //构造函数
    ListNode() {}; //默认构造函数，针对头节点header和尾节点trailer构造
-   ListNode(T e, ListNodePosi<T> p = nullptr, ListNodePosi<T> s = nullptr)
+   ListNode(T e, ListNodePosi<T> p = nullptr, ListNodePosi<T> s = nullptr) //////////////?????????模板类型如何定义默认初始化呀
        : elem(e), pre(p), suc(s){}; //默认构造器
 
    //操作接口
-   ListNodePosi<T>& pred() { return pre; } //获得前驱节点位置
-   ListNodePosi<T>& succ() { return suc; } //获得后继节点位置——————作为可修改的左值
-   T& data() { return elem; }              //获得当前节点所存数据对象
+   const ListNodePosi<T> pred() const { return pre; } //获得前驱节点位置
+   const ListNodePosi<T> succ() const { return suc; } //获得后继节点位置
+   T data() const { return elem; }                    //获得当前节点所存数据对象
 
    ListNodePosi<T> insertAsPred(T const &e); //插入前驱节点，返回其位置
    ListNodePosi<T> insertAsSucc(T const &e); //插入后继节点，返回其位置
