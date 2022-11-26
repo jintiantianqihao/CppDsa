@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "binnode.hpp"
+#include "release.h"
 using std::cin;
 using std::cout;
 using std::endl;
@@ -40,12 +41,13 @@ class BinTree { //二叉树类
   BinNodePosi<T> root() const { return _root; } //树根获取
 
   //根节点插入函数
-  BinNodePosi<T> insert(BinNodePosi<T> x); //根节点插入：insertAsROOT
+  BinNodePosi<T> insert(const T &e); //根节点插入：insertAsROOT
   //子节点插入函数
   BinNodePosi<T> insert(BinNodePosi<T> x, T const &e); //右孩子插入:insertAsRC
   BinNodePosi<T> insert(T const &e, BinNodePosi<T> x); //左孩子插入:insertAsLC
   //子树接入函数
-  //BinNodePosi<T> attach()
+  BinNodePosi<T> attach(BinNodePosi<T> x, BinTree<T>* &S); //左树接入：insertLT
+  BinNodePosi<T> attach(BinTree<T>* &S, BinNodePosi<T> x); //右树接入：insertRT
 };
 
 //***************************************实现部分*************************************************//
@@ -92,14 +94,46 @@ BinNodePosi<T> BinTree<T>::insert(const T &e, BinNodePosi<T> x) {
 
 //insertAsROOT
 template <typename T>
-BinNodePosi<T> BinTree<T>::insert(BinNodePosi<T> x) {
-  ++_size;              //插入前先做判断，此处默认二叉树为空
-  _root = x;            //直接修改根节点为已知节点
-  updataHeightAbove(x); //树高更新
+BinNodePosi<T> BinTree<T>::insert(const T &e) {
+  _size = 1;                 //插入前先做判断，此处默认二叉树为空
+  _root = new BinNode<T>(e); //利用构造函数进行初始化传参(申请内存Q1)
 
   return root();
 }
 
-////4.子树接入函数
+////4.子树接入函数(内存防泄漏是关键)？？？？？？？？？？
+//insertLT：1.调整链接 ——> 2.更新树的属性 ——> 3.释放节点
+template <typename T>
+BinNodePosi<T> BinTree<T>::attach(BinNodePosi<T> x, BinTree<T> *&S) {
+  x->lc = S->_root; //x左子为接入的树根部
+  S->_root->pt = x; //同上均为调整链接
+
+  _size += S->size();   //节点数修正
+  updataHeightAbove(x); //高度修正
+
+  S->_root = nullptr;
+  S->_size = 0; //消除通过S访问的模式
+  release(S);   //释放树，只保留各个节点
+  S = nullptr;
+
+  return x;
+}
+
+//insertRT
+template <typename T>
+BinNodePosi<T> BinTree<T>::attach(BinTree<T> *&S, BinNodePosi<T> x) {
+  x->rc = S->_root; //x右子为接入的树根部
+  S->_root->pt = x; //同上均为调整链接
+
+  _size += S->size();   //节点数修正
+  updataHeightAbove(x); //高度修正
+
+  S->_root = nullptr;
+  S->_size = 0; //消除通过S访问的模式
+  //release(S);   //释放内存(A1)
+  S = nullptr;
+
+  return x;
+}
 
 #endif

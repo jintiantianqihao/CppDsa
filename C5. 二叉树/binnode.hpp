@@ -14,7 +14,7 @@ template <typename T> int getNodeSize(BinNodePosi<T> node);
 template <typename T>
 class BinNode { //二叉树节点模板类
 
- private:
+ protected:
    //成员
    BinNodePosi<T> pt;     //父节点
    BinNodePosi<T> lc, rc; //左、右节点

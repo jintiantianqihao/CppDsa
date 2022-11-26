@@ -48,8 +48,8 @@ class List { //列表模板类
    ListNodePosi<T> search(const T &e) const { return search(e, _size, tailer); } //有序列表查找
    ListNodePosi<T> search(const T &e, int n, ListNodePosi<T> p) const;           //有序区间向前查找
    ListNodePosi<T> search(const T &e, ListNodePosi<T> p, int n) const;           //有序区间向后查找
-   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n) const;                          //在p及其n-1个后继中选出最大者
-   ListNodePosi<T> selectMax() const { return selectMax(header->succ(), _size); }      //整体最大者
+   ListNodePosi<T> selectMax(ListNodePosi<T> p, int n) const;                    //在p及其n-1个后继中选出最大者
+   ListNodePosi<T> selectMax() const { return selectMax(header->succ(), _size); } //整体最大者
 
    // 可写访问接口
    ListNodePosi<T> insertAsFirst(const T &e);                   //将e当作首节点插入
