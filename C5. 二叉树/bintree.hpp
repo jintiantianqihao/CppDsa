@@ -18,36 +18,34 @@ class BinTree { //二叉树类
 
  protected:
 
-  //要素成员
+  ////要素成员
   int _size;            //规模
-  BinNodePosi<T> _root; //根节点
+  BinNodePosi<T> _root; //根节点（一个标记指针，不产生冗余的堆内存）
 
-  //***********定义空树高度（只在类内调用）————用内联函数替换宏定义，在编译时就进行替换，效率和宏函数相当
+  ////***********定义空树高度（只在类内调用）————用内联函数替换宏定义，在编译时就进行替换，效率和宏函数相当
   static int stature(BinNodePosi<T> p) { return (p == nullptr) ? -1 : p->height(); } //此处也可以不用inline，类内直接内联
 
-  //树内部迭代
+  ////树内部迭代
   virtual int updateHeight(BinNodePosi<T> x); //更新节点x的高度（虚方法便于不同种类树继承高度情况，类外定义时不必再加虚函数类型）
-  void updataHeightAbove(BinNodePosi<T> x);   //更新节点x及其祖先高度
+  void updateHeightAbove(BinNodePosi<T> x);   //更新节点x及其祖先高度
 
- public:
+public:
   
-  //构造析构函数
-  BinTree(): _size(0), _root(nullptr) {}    //构造函数
-  //~BinTree() { if(_size > 0) remove(root); } //析构函数
+  ////构造析构函数
+  BinTree(): _size(0), _root(nullptr) {}     //构造函数
+  ~BinTree() { if(_size > 0) remove(root); } //析构函数
 
-  //操作函数
-  int size() const { return _size; }            //规模获取————函数后const表示函数不可修改类内成员
-  bool empty() const { return !_root; }         //判空
-  BinNodePosi<T> root() const { return _root; } //树根获取
+  ////操作函数
+  int size() const { return _size; }                       //规模获取————函数后const表示函数不可修改类内成员
+  bool empty() const { return !_root; }                    //判空
+  BinNodePosi<T> root() const { return _root; }            //树根获取
 
-  //根节点插入函数
-  BinNodePosi<T> insert(const T &e); //根节点插入：insertAsROOT
-  //子节点插入函数
-  BinNodePosi<T> insert(BinNodePosi<T> x, T const &e); //右孩子插入:insertAsRC
-  BinNodePosi<T> insert(T const &e, BinNodePosi<T> x); //左孩子插入:insertAsLC
-  //子树接入函数
-  BinNodePosi<T> attach(BinNodePosi<T> x, BinTree<T>* &S); //左树接入：insertLT
-  BinNodePosi<T> attach(BinTree<T>* &S, BinNodePosi<T> x); //右树接入：insertRT
+  BinNodePosi<T> insert(const T &e);                       //根节点插入：insertAsROOT
+  BinNodePosi<T> insert(BinNodePosi<T> x, T const &e);     //右孩子插入: insertAsRC
+  BinNodePosi<T> insert(T const &e, BinNodePosi<T> x);     //左孩子插入: insertAsLC
+  BinNodePosi<T> attach(BinNodePosi<T> x, BinTree<T> *&S); //左树接入：insertLT
+  BinNodePosi<T> attach(BinTree<T> *&S, BinNodePosi<T> x); //右树接入：insertRT
+  int remove(BinNodePosi<T> x);                            //删除以位置x处的节点为根的子树，并返回原子树规模
 };
 
 //***************************************实现部分*************************************************//
@@ -61,7 +59,7 @@ int BinTree<T>::updateHeight(BinNodePosi<T> x) { //O(1):普通二叉树的高度
 
 //2.节点x及其祖先高度依次更新(全树高度更新)
 template <typename T>
-void BinTree<T>::updataHeightAbove(BinNodePosi<T> x) { //O(n = height):最大高度遍历——————最深叶节点加子树啦
+void BinTree<T>::updateHeightAbove(BinNodePosi<T> x) { //O(n = height):最大高度遍历——————最深叶节点加子树啦
   while (x != root()) {
     updateHeight(x);
     x = x->parent();
@@ -77,7 +75,7 @@ template <typename T>
 BinNodePosi<T> BinTree<T>::insert(BinNodePosi<T> x, const T &e) {
   ++_size;              //插入前先判断，此处默认x右子树空，插入必成功
   x->insertAsRC(e);     //插入做右子树(在此处就完成了右子树更新，具体见binnode实现)
-  updataHeightAbove(x); // x及其祖先节点高度可能变，其余节点必不变；
+  updateHeightAbove(x); // x及其祖先节点高度可能变，其余节点必不变；
 
   return x->rChild();
 }
@@ -87,7 +85,7 @@ template <typename T>
 BinNodePosi<T> BinTree<T>::insert(const T &e, BinNodePosi<T> x) {
   ++_size;              //插入前先判断，此处默认x左子树空，插入必成功
   x->insertAsLC(e);     //插入做右子树(在此处就完成了右子树更新，具体见binnode实现)
-  updataHeightAbove(x); //x及其祖先节点高度可能变，其余节点必不变；
+  updateHeightAbove(x); //x及其祖先节点高度可能变，其余节点必不变；
 
   return x->lChild();
 }
@@ -109,11 +107,11 @@ BinNodePosi<T> BinTree<T>::attach(BinNodePosi<T> x, BinTree<T> *&S) {
   S->_root->pt = x; //同上均为调整链接
 
   _size += S->size();   //节点数修正
-  updataHeightAbove(x); //高度修正
+  updateHeightAbove(x); //高度修正
 
   S->_root = nullptr;
   S->_size = 0; //消除通过S访问的模式
-  release(S);   //释放树，只保留各个节点
+  
   S = nullptr;
 
   return x;
@@ -126,14 +124,15 @@ BinNodePosi<T> BinTree<T>::attach(BinTree<T> *&S, BinNodePosi<T> x) {
   S->_root->pt = x; //同上均为调整链接
 
   _size += S->size();   //节点数修正
-  updataHeightAbove(x); //高度修正
+  updateHeightAbove(x); //高度修正
 
   S->_root = nullptr;
   S->_size = 0; //消除通过S访问的模式
-  //release(S);   //释放内存(A1)
-  S = nullptr;
+  
+  S = nullptr; //在栈上而非堆上，只用重新置空即可摧毁，不必release
 
   return x;
 }
+
 
 #endif

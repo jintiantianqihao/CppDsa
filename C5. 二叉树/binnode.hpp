@@ -14,21 +14,21 @@ template <typename T> int getNodeSize(BinNodePosi<T> node);
 template <typename T>
 class BinNode { //二叉树节点模板类
 
- protected:
-   //成员
-   BinNodePosi<T> pt;     //父节点
-   BinNodePosi<T> lc, rc; //左、右节点
-   T elem;                //数值
-   int ht;                //高度(通用)
-   int npl;               // Null Path Length(左氏堆，也可以用height直接替代)
-   RBColor color;         //颜色(红黑树)
-   //友邻类
+ protected:                 //成员
+
+   BinNodePosi<T> pt;       //父节点
+   BinNodePosi<T> lc, rc;   //左、右节点
+   T elem;                  //数值
+   int ht;                  //高度(通用)
+   int npl;                 // Null Path Length(左氏堆，也可以用height直接替代)
+   RBColor color;           //颜色(红黑树)
+  
    friend class BinTree<T>; //二叉树友邻类，便于封装接口和类实现
 
  public:
   //构造函数
    BinNode() : 
-    pt(nullptr), lc(nullptr), rc(nullptr), ht(0), npl(1), color(RB_RED) {}                                                                                                                         //默认构造函数
+    pt(nullptr), lc(nullptr), rc(nullptr), ht(0), npl(1), color(RB_RED) {}   //默认构造函数
    BinNode(T e, BinNodePosi<T> p = nullptr, BinNodePosi<T> l = nullptr, BinNodePosi<T> r = nullptr, int h = 0, int n = 1, RBColor c = RB_RED) : 
     elem(e), pt(p), lc(l), rc(r), ht(h), npl(n), color(c) {} //带参data构造函数
 
