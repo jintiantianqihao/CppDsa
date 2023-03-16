@@ -4,9 +4,9 @@
 enum RBColor { RB_RED,
                RB_BLACK }; //红黑树节点颜色
 
-template <typename T> class BinNode; //预先声明类
+template <typename T> class BinNode;                    //预先声明类
 template <typename T> using BinNodePosi = BinNode<T> *; //节点位置
-template <typename T> class BinTree; //预先声明友邻类，便于后续访问
+template <typename T> class BinTree;                    //预先声明友邻类，便于后续访问
 
 //辅助函数————计算节点后代数
 template <typename T> int getNodeSize(BinNodePosi<T> node);
@@ -59,8 +59,34 @@ class BinNode { //二叉树节点模板类
    bool operator!=(const BinNode &bn) { return elem != bn.elem; } //不等重载
    bool operator>=(const BinNode &bn) { return elem >= bn.elem; } //重载大于等于号
    bool operator<=(const BinNode &bn) { return elem <= bn.elem; } //重载小于等于号
+
+   //内联BinNode节点状态函数
+   bool IsRoot(BinNodePosi<T> x) { return !(x->pt); }                           //是否根节点
+   bool IsLChild(BinNodePosi<T> x) { return (!IsRoot(x) && (x == x->pt->lc)); } //是否左子节点
+   bool IsRChild(BinNodePosi<T> x) { return (!IsRoot(x) && (x == x->pt->rc)); } //是否右子节点
+   bool HasParent(BinNodePosi<T> x) { return x->pt; }                           //有父节点
+   bool HasLChild(BinNodePosi<T> x) { return x->lc; }                           //有左子节点
+   bool HasRChild(BinNodePosi<T> x) { return x->rc; }                           //有右子节点
+   bool HasChild(BinNodePosi<T> x) { return HasLChild(x) || HasRChild(x); }     //是否有孩子
+   bool HasBothChild(BinNodePosi<T> x) { return HasLChild(x) && HasRChild(x); } //是否同时拥有两个孩子
+   bool IsLeaf(BinNodePosi<T> x) { return !HasChild(x); }                       //是否叶节点
+
+   // BinNode特定关联的节点指针
+   BinNodePosi<T>& FromParentTo(BinNodePosi<T> x) { return (IsRoot(x) ? x : (IsLChild(x) ? x->pt->lc : x->pt->rc)); } //来自父节点的引用
 };
-/********************************函数实现************************************/
+
+
+
+//****************************************************************************************************************************
+//****************************************************************************************************************************
+//********************************************************* 实 ***************************************************************
+//********************************************************* 现 ***************************************************************
+//********************************************************* 部 ***************************************************************
+//********************************************************* 分 ***************************************************************
+//****************************************************************************************************************************
+//****************************************************************************************************************************
+
+
 
 ////辅助函数
 //递归实现后代节点总数求解

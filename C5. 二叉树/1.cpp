@@ -30,6 +30,9 @@ int main(void)
   cout << lck.root()->data() <<endl;
   cout << lck.root()->rChild()->data() <<endl;
 
+  lck.root()->lChild()->FromParentTo(lck.root()->lChild()) == nullptr;
+  cout << lck.root()->lChild() <<endl;
+
   return 0;
   
 }
