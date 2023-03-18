@@ -16,8 +16,7 @@ int max(const int &a, const int &b) { //const在引用左侧修饰的是&底层c
   return (a > b) ? a : b;
 }
 
-
-
+template <typename T> static int removeAt(BinNodePosi<T> x);
 
 
 template <typename T>
@@ -27,33 +26,32 @@ class BinTree { //二叉树类
 
   ////要素成员
   int _size;            //规模
-  BinNodePosi<T> _root; //根节点（一个标记指针，不产生冗余的堆内存
-
-  //friend BinNodePosi<T> &FromParentTo(BinNodePosi<T> x); //获得x在树中相应位置的引用
+  BinNodePosi<T> _root; //根节点（一个标记指针，不产生冗余的堆内存)
 
   static int stature(BinNodePosi<T> p) { return (p == nullptr) ? -1 : p->height(); } //////***********定义空树高度（只在类内调用）:此处也可以不用inline，类内直接内联————用内联函数替换宏定义，在编译时就进行替换，效率和宏函数相当
   virtual int updateHeight(BinNodePosi<T> x); //更新节点x的高度（虚方法便于不同种类树继承高度情况，类外定义时不必再加虚函数类型）
   void updateHeightAbove(BinNodePosi<T> x);   //更新节点x及其祖先高度
 
+
 public:
   
   ////构造析构
-  BinTree(): _size(0), _root(nullptr) {}     //构造函数
+  BinTree(): _size(0), _root(nullptr) {}      //构造函数
   //~BinTree() { if(_size > 0) remove(_root); } //析构函数
 
   ////操作函数
   int size() const { return _size; }                       //规模获取————函数后const表示函数不可修改类内成员
   bool empty() const { return !_root; }                    //判空
   BinNodePosi<T> root() const { return _root; }            //树根获取
-  //可修改的树根获取
 
-  BinNodePosi<T> insert(const T &e);                       //根节点插入：insertAsROOT
-  BinNodePosi<T> insert(BinNodePosi<T> x, T const &e);     //右孩子插入: insertAsRC
-  BinNodePosi<T> insert(T const &e, BinNodePosi<T> x);     //左孩子插入: insertAsLC
-  BinNodePosi<T> attach(BinNodePosi<T> x, BinTree<T> *&S); //左树接入：insertLT
-  BinNodePosi<T> attach(BinTree<T> *&S, BinNodePosi<T> x); //右树接入：insertRT
-  int remove(BinNodePosi<T> x);                            //子树删除：删除以位置x处的节点为根的子树，并返回原子树规模
-  BinTree<T> *secede(BinNodePosi<T> x);                    //子树分离：将x处子树分离，封装并返回一棵独立子树
+  void setRoot(BinNodePosi<T> node) { _root = node; ++_size; } //修改树根获取
+  BinNodePosi<T> insert(const T &e);                           //根节点插入：insertAsROOT
+  BinNodePosi<T> insert(BinNodePosi<T> x, T const &e);         //右孩子插入: insertAsRC
+  BinNodePosi<T> insert(T const &e, BinNodePosi<T> x);         //左孩子插入: insertAsLC
+  BinNodePosi<T> attach(BinNodePosi<T> x, BinTree<T> *&S);     //左树接入：insertLT
+  BinNodePosi<T> attach(BinTree<T> *&S, BinNodePosi<T> x);     //右树接入：insertRT
+  int remove(BinNodePosi<T> x);                                //子树删除：删除以位置x处的节点为根的子树，并返回原子树规模________________________________________________________________内存泄漏有待解决
+  BinTree<T> *secede(BinNodePosi<T> x);                        //子树分离：将x处子树分离，封装并返回一棵独立子树
 };
 
 
@@ -66,6 +64,7 @@ public:
 //********************************************************* 分 ***************************************************************
 //****************************************************************************************************************************
 //****************************************************************************************************************************
+
 
 
 ////1.节点x高度更新函数
@@ -150,5 +149,40 @@ BinNodePosi<T> BinTree<T>::attach(BinTree<T> *&S, BinNodePosi<T> x) {
   return x;
 }
 
+////5.子树删除函数
+template <typename T>
+int BinTree<T>::remove(BinNodePosi<T> x) {
+  x->FromParentTo(x) = nullptr; //切断来自父节点的指针
+  updateHeightAbove(x->pt);     //更新祖先高度
 
+  int n = removeAt(x); //删除子树x
+  _size -= n;          //更新规模
+  return n;            //返回删除的节点数
+}
+
+//递归实现子树删除函数
+template <typename T>
+static int removeAt(BinNodePosi<T> x) { // O(n) = O(|size|)
+  if (!x) return 0;                     //递归基
+
+  int n = 1 + removeAt(x->lc) + removeAt(x->rc); //递归释放左右子树
+  //release(x->elem);  
+  //release(x); //释放被删除节点空间并初始化元素值
+  return n;   //返回被删除的节点数
+}
+
+////6.子树分离函数
+template <typename T>
+BinTree<T> *BinTree<T>::secede(BinNodePosi<T> x) {
+  x->FromParentTo(x) = nullptr;
+  updateHeightAbove(x->pt);
+
+  //分离出的子树重新封装
+  BinTree<T> *S = new BinTree<T>; //创建一棵空树
+  S->_root = x;
+  x->pt = nullptr; //新树以x为根
+  S->_size = getNodeSize(x);
+  _size -= S->_size; //更新节点数
+  return S;          //返回分离的子树
+}
 #endif
